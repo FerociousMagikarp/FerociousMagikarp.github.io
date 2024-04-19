@@ -1,0 +1,268 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>C++协程理论 | 鲤鱼王的个人想法记录</title><meta name="author" content="Ferocious Magikarp"><meta name="copyright" content="Ferocious Magikarp"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="原文来自coroutine-theory，这里只是小小地翻译一下。以下正文： 这是关于 C++ Coroutine TS 系列文章的第一篇，协程是一个新的语言特性，正在纳入C++20的语言标准（这篇文章是2017年写的，现在各大编译器都支持协程了——译注）。 在这个系列中，我将会介绍C++协程底层工作原理，并展示怎么用协程构建高级抽象，正如cppcoro库所提供的那样。 在这篇文章中，我将描述函数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++协程理论">
+<meta property="og:url" content="https://ferociousmagikarp.github.io/2024/04/19/cpp%E5%8D%8F%E7%A8%8B%E7%90%86%E8%AE%BA/index.html">
+<meta property="og:site_name" content="鲤鱼王的个人想法记录">
+<meta property="og:description" content="原文来自coroutine-theory，这里只是小小地翻译一下。以下正文： 这是关于 C++ Coroutine TS 系列文章的第一篇，协程是一个新的语言特性，正在纳入C++20的语言标准（这篇文章是2017年写的，现在各大编译器都支持协程了——译注）。 在这个系列中，我将会介绍C++协程底层工作原理，并展示怎么用协程构建高级抽象，正如cppcoro库所提供的那样。 在这篇文章中，我将描述函数">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ferociousmagikarp.github.io/image/head.png">
+<meta property="article:published_time" content="2024-04-19T14:23:23.000Z">
+<meta property="article:modified_time" content="2024-04-19T15:34:00.727Z">
+<meta property="article:author" content="Ferocious Magikarp">
+<meta property="article:tag" content="计算机">
+<meta property="article:tag" content="C++">
+<meta property="article:tag" content="协程">
+<meta property="article:tag" content="博客翻译">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ferociousmagikarp.github.io/image/head.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://ferociousmagikarp.github.io/2024/04/19/cpp%E5%8D%8F%E7%A8%8B%E7%90%86%E8%AE%BA/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: false,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'C++协程理论',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-04-19 23:34:00'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/background.css"><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/image/head.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a href="/" title="鲤鱼王的个人想法记录"><span class="site-name">鲤鱼王的个人想法记录</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">C++协程理论</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-04-19T14:23:23.000Z" title="发表于 2024-04-19 22:23:23">2024-04-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-04-19T15:34:00.727Z" title="更新于 2024-04-19 23:34:00">2024-04-19</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/C/">C++</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>11分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="C++协程理论"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>原文来自<a target="_blank" rel="noopener" href="https://lewissbaker.github.io/2017/09/25/coroutine-theory">coroutine-theory</a>，这里只是小小地翻译一下。以下正文：</p>
+<p>这是关于 <a target="_blank" rel="noopener" href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4680.pdf">C++ Coroutine TS</a> 系列文章的第一篇，协程是一个新的语言特性，正在纳入C++20的语言标准（这篇文章是2017年写的，现在各大编译器都支持协程了——译注）。</p>
+<p>在这个系列中，我将会介绍C++协程底层工作原理，并展示怎么用协程构建高级抽象，正如<a target="_blank" rel="noopener" href="https://github.com/lewissbaker/cppcoro">cppcoro</a>库所提供的那样。</p>
+<p>在这篇文章中，我将描述函数和协程之间的区别，并提供一些理论以描述协程所支持的操作方式。本文的目的就是构建一些基本的概念，以帮助你构建对C++协程的思考方式。</p>
+<h2 id="协程就是函数就是协程"><a href="#协程就是函数就是协程" class="headerlink" title="协程就是函数就是协程"></a>协程就是函数就是协程</h2><p>协程（Coroutine）是函数的泛化，允许函数挂起并在之后恢复。</p>
+<p>我在后文将会更详细地解释其中的含义，不过在这之前，我们先来看一下“普通”的函数是怎么工作的。</p>
+<h2 id="“普通”函数"><a href="#“普通”函数" class="headerlink" title="“普通”函数"></a>“普通”函数</h2><p>我们认为一个普通的函数有两种操作：<strong>调用（Call）</strong>和<strong>返回（Return）</strong>（注意，这里我将“抛出异常”这个操作大致归入<strong>返回</strong>操作中）。</p>
+<p><strong>调用</strong>操作会创建一个激活帧（Activation Frame），挂起调用函数的执行，并将执行指令的地址转移到被调用函数的开头。</p>
+<p><strong>返回</strong>操作将返回值传回给调用方，销毁激活帧，然后在调用方调用这个函数的位置恢复其执行。</p>
+<p>让我们来进一步分析这些语义：</p>
+<h3 id="激活帧"><a href="#激活帧" class="headerlink" title="激活帧"></a>激活帧</h3><p>所以“激活帧”是个什么东西？</p>
+<p>你可以将激活帧视为一个内存块，其中保存了当前调用函数的状态。这个状态包括了任意传给这个这个函数的参数，以及其中的任意局部变量。</p>
+<p>对于普通函数来说，激活帧也包括返回地址：就是这个函数返回时会执行的传输指令的地址，以及用来调用这个调用函数的激活帧的地址。你可以将这些信息一起视为函数调用的延续，即它们描述了哪个函数的调用会继续执行，以及在哪个位置上这个函数会执行完成。</p>
+<p>对于“正常”函数，所有激活帧都有严格嵌套的生命周期。这种严格嵌套关系就允许我们使用高效的内存数据结构，来对每个函数调用的激活帧进行内存的分配和释放。这种数据结构通常称为“栈”。</p>
+<p>如果激活帧分配在栈的数据结构中，就通常称其为“栈帧”。</p>
+<p>这种栈的数据结构非常通用，以至于大部分（或者说所有？）CPU架构都有专门的寄存器来保存这个栈顶指针（比如x64架构下的 <code>rsp</code> 寄存器）。</p>
+<p>要分配激活帧的内存空间，只需要把栈顶指针的值增加那个激活帧大小即可。反之，释放内存的时候只需要减去这个大小即可。</p>
+<h3 id="“调用”操作"><a href="#“调用”操作" class="headerlink" title="“调用”操作"></a>“调用”操作</h3><p>当一个函数调用其他函数，那么调用方必须首先为挂起做好准备。</p>
+<p>这个挂起的步骤通常包括将CPU寄存器中的所有值保存到内存中，以便在之后函数恢复调用之后可以恢复这些值。根据函数的调用约定，调用方和被调用方可以协调谁来保存这些寄存器的值，不过你仍然可以将其视为<strong>调用</strong>操作的一部分。</p>
+<p>调用方还会将传递给被调用函数的参数也存储在新的激活帧中，使函数能访问这些参数。</p>
+<p>最终，调用方将恢复点的地址写入新的激活帧，并将执行地址转到被调用函数的开头。</p>
+<p>在x86&#x2F;x64架构中，这个最终的操作有相应的调用指令，即 <code>call</code> 指令，该指令将下一条指令的地址写到栈上，按地址大小增加栈指针，之后跳转到指令操作数中指定的地址。</p>
+<h3 id="“返回”操作"><a href="#“返回”操作" class="headerlink" title="“返回”操作"></a>“返回”操作</h3><p>当函数使用 <code>return</code> 语句返回时，函数首先会存储返回值（如果有的话），以使调用者能够访问到它。这可以发生在调用方的激活帧中，也可能在此函数的激活帧中（对于跨越两个激活帧边界的数据，即参数和返回值，这个区别会有些模糊）。</p>
+<p>之后函数会用如下方式清除激活帧：</p>
+<ul>
+<li>销毁返回点范围内的任何局部变量</li>
+<li>销毁参数对象</li>
+<li>释放激活帧使用的内存</li>
+</ul>
+<p>最终，将会用如下方式恢复调用函数：</p>
+<ul>
+<li>通过设置栈寄存器的指针来恢复调用方的激活帧，并恢复可能被此函数破坏的寄存器的值</li>
+<li>跳转到调用方在“调用”操作时所存储的恢复点位置</li>
+</ul>
+<p>注意，与“调用”操作一样，一些调用约定也会在“返回”操作中，分配调用方和被调用方的职责。</p>
+<h2 id="协程"><a href="#协程" class="headerlink" title="协程"></a>协程</h2><p>协程推广了函数调用的操作，将函数调用步骤中的<strong>调用</strong>和<strong>返回</strong>操作分解为了三个额外的操作：<strong>挂起（Suspend）</strong>、<strong>恢复（Resume）</strong>和<strong>销毁（Destroy）</strong>。</p>
+<p><strong>挂起</strong>操作在协程函数的当前点暂停执行，将执行转回到调用函数或恢复器，并且不会销毁激活帧。在协程挂起时，其作用域内的任何对象都将保持生命周期的存续状态。</p>
+<p>注意，就像<strong>返回</strong>操作一样，协程只会在其明确定义的挂起点上执行挂起操作。</p>
+<p><strong>恢复</strong>操作会在协程的挂起点上将其恢复执行，这会重新激活协程的激活帧。</p>
+<p><strong>销毁</strong>操作会销毁激活帧，并不会恢复协程的执行。在挂起点作用域内的任何对象都会被销毁，并释放激活帧所使用的内存。</p>
+<h3 id="协程激活帧"><a href="#协程激活帧" class="headerlink" title="协程激活帧"></a>协程激活帧</h3><p>由于协程可以不销毁地挂起激活帧，所以我们不能保证激活帧的生命周期严格嵌套。这就意味着激活帧不能像通常那样分配在栈数据结构上，而是分配在堆上。</p>
+<p>在 C++ Coroutine TS 中有一些规定，如果编译器能证明协程的生命周期确实是与调用方严格嵌套的，那么就允许调用方的激活帧分配协程帧的内存。这样，在大多数情况下，只要有一个足够智能的编译器，就可以避免堆内存分配。</p>
+<p>对于协程来说，激活帧的有些部分需要在协程挂起期间保留，有一些部分只需要在协程运行期间保持即可。例如，有的变量的生命周期不跨越任何协程挂起点，那这些变量就可以存储在栈上。</p>
+<p>在逻辑上你就可以这么思考协程帧，将其分为两部分：“协程帧”和“栈帧”。</p>
+<p>“协程帧”会在协程挂起时保存协程激活帧的一部分，“栈帧”只在协程运行时存在，并会在协程将执行转移回调用方时释放。</p>
+<h3 id="“挂起”操作"><a href="#“挂起”操作" class="headerlink" title="“挂起”操作"></a>“挂起”操作</h3><p><strong>挂起</strong>操作允许协程暂停在函数的中间，并将执行权转回到调用函数或者协程的恢复器。</p>
+<p>在协程主体中，有某些确定的点被指定为挂起点。在 C++ Coroutine TS 中，这些挂起点通过关键字 <code>co_wait</code> 和 <code>co_yield</code> 来标识。</p>
+<p>当一个协程命中挂起点时，它将会使用以下方法来为恢复协程做准备：</p>
+<ul>
+<li>保证寄存器中的任意变量都写进协程帧</li>
+<li>将协程挂起位置写入协程帧。这允许后续的<strong>恢复</strong>操作知道从哪恢复协程的执行，<strong>销毁</strong>操作知道作用域内的哪些变量需要被销毁。</li>
+</ul>
+<p>一旦协程准备好恢复，就可以将其视为“已挂起”。</p>
+<p>之后，协程有机会在执行权转移回调用方&#x2F;恢复器之前，执行一些额外的逻辑。这些逻辑拥有对协程帧句柄的访问权限，该句柄将用于之后恢复或销毁协程。</p>
+<p>这种协程进入“挂起”状态之后执行逻辑的能力，允许协程被安排恢复，而不需要同步。否则如果协程在进入“挂起”状态之前就被安排恢复，那么就需要同步，因为协程可能回存在挂起和恢复的竞争。关于这点我将会在以后的文章中作详细介绍。</p>
+<p>然后协程可以选择立即恢复&#x2F;继续执行协程，或者将执行转回给调用方&#x2F;恢复器。</p>
+<p>如果调用被转移回调用方&#x2F;恢复器，那么栈帧作为协程激活帧的一部分，就会释放并弹出栈。</p>
+<h3 id="“恢复”操作"><a href="#“恢复”操作" class="headerlink" title="“恢复”操作"></a>“恢复”操作</h3><p><strong>恢复</strong>操作可以执行于处在挂起状态的协程中。</p>
+<p>当一个函数想要恢复协程时，它就需要有效地调用到协程函数特定的中间位置。恢复器想要恢复协程的方法，就是在对应<strong>挂起</strong>的协程帧句柄上，调用 <code>void resume()</code> 方法。</p>
+<p>正如普通函数调用那样，调用 <code>resume()</code> 方法也会创建一个新的栈帧，并在转移执行到函数之前把调用者的返回地址存储在这个栈帧中。</p>
+<p>但是，执行不会转移到这个协程函数的开头，而是会转移到其挂起的点。其通过从协程帧加载恢复点并跳转过去来实现此目的。</p>
+<p>当协程下一次挂起或运行完成后，这个对 <code>resume()</code> 的调用将会返回，并且恢复调用函数的执行。</p>
+<h3 id="“销毁”操作"><a href="#“销毁”操作" class="headerlink" title="“销毁”操作"></a>“销毁”操作</h3><p><strong>销毁</strong>操作销毁了协程帧，并且不会恢复协程的执行。</p>
+<p>这个操作只能执行在已挂起的协程上。</p>
+<p><strong>销毁</strong>操作与<strong>恢复</strong>操作非常相似，在于其会重新激活协程的激活帧，包括分配新的栈帧内存，并将<strong>销毁</strong>操作调用方的返回地址存放在其中。</p>
+<p>但是，此操作不会转移执行到协程主体内上次挂起的点，而是转移到另外的代码路径，这里会调用挂起点作用域内所有局部变量的析构函数，然后释放协程帧使用的内存。</p>
+<p>与<strong>恢复</strong>操作相似，<strong>销毁</strong>操作通过在协程<strong>挂起</strong>期间提供的协程帧句柄，调用其中的 <code>void destroy()</code> 方法，来标识要销毁的特定激活帧。</p>
+<h3 id="协程的“调用”操作"><a href="#协程的“调用”操作" class="headerlink" title="协程的“调用”操作"></a>协程的“调用”操作</h3><p><strong>调用</strong>一个协程的操作和调用普通函数的操作大差不差。事实上，从调用方的角度来看没有任何区别。</p>
+<p>但是，协程函数的调用操作，会在执行到其第一个挂起点时就转移执行给调用方，而不是只在函数调用结束后才返回。</p>
+<p>在协程上执行<strong>调用</strong>操作时，调用方分配一个新的栈帧内存，把参数写进栈帧中，把返回地址也写进去，接着转移执行到协程。这个过程跟调用普通函数是一样的。</p>
+<p>在这之后，协程首先要做的就是在堆上分配一个协程帧内存，并把栈帧上的参数复制&#x2F;移动到协程帧上，一边这些参数的生命周期能在第一个挂起点之后延续下去。</p>
+<h3 id="协程的“返回”操作"><a href="#协程的“返回”操作" class="headerlink" title="协程的“返回”操作"></a>协程的“返回”操作</h3><p>协程的<strong>返回</strong>操作和普通函数有一些区别。</p>
+<p>当一个协程执行 <code>return</code> 语句（TS里规定是 <code>co_return</code> ），它会将返回值存储在某个位置（协程可以自定义存储在什么地方），接着销毁任意作用域内的局部变量（但是不包括参数）。</p>
+<p>然后，协程有机会在转移执行回调用者&#x2F;恢复器之前，执行一个额外的逻辑。</p>
+<p>这些额外的逻辑可以执行一些逻辑来公开返回值，或者恢复其它协程并等待其返回结果。这些都是可以自定义的。</p>
+<p>接下来协程可以执行<strong>挂起</strong>操作（保持协程帧不被销毁）或者<strong>销毁</strong>操作（销毁协程帧）。</p>
+<p>这之后，正如<strong>挂起</strong>&#x2F;<strong>销毁</strong>操作的语义那样，执行会转移回调用方&#x2F;恢复器，并将激活帧中的栈帧组件从栈上弹出。</p>
+<p>值得注意的是，<strong>返回</strong>操作给出的返回值和<strong>调用</strong>操作给出的返回值不同，因为<strong>返回</strong>操作可能会在调用方从最初的<strong>调用</strong>操作恢复后很久才会执行。</p>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>我想通过一个简单的示例来说明协程在调用、挂起和恢复的时候都发生了什么，并把这些概念都展示在图片中。</p>
+<p>所以让我们假设有一个函数（或者协程） <code>f()</code>，这个函数调用了一个协程 <code>x(int a)</code> 。</p>
+<p>在调用之前，寄存器和内存中的情况如下图所示：</p>
+<p><img src="/image/pic_2024_4_19_coroutine_1_1.png" alt="协程示例图片1-1"></p>
+<p>然后，当调用 <code>x(42)</code> 时，就会先创建一个 <code>x()</code> 的栈帧，就像普通函数那样。</p>
+<p><img src="/image/pic_2024_4_19_coroutine_1_2.png" alt="协程示例图片1-2"></p>
+<p>接着，一旦协程 <code>x()</code> 在堆上分配完协程帧的内存，并将参数都复制&#x2F;移动到协程帧里了，我们将会得到如下图所示的内容。注意，编译器往往会将协程帧地址保存在不同的栈指针寄存器中（例如，MSVC保存在 <code>rbp</code> 寄存器中）。</p>
+<p><img src="/image/pic_2024_4_19_coroutine_1_3.png" alt="协程示例图片1-3"></p>
+<p>如果协程 <code>x()</code> 调用其他普通函数 <code>g()</code> ，看起来就会像这样：</p>
+<p><img src="/image/pic_2024_4_19_coroutine_1_4.png" alt="协程示例图片1-4"></p>
+<p>当 <code>g()</code> 返回时，它会销毁其激活帧，并恢复 <code>x()</code> 的激活帧。假设我们在局部变量 <code>b</code> 中保存 <code>g()</code> 的返回值，并将其存储到协程帧中。</p>
+<p><img src="/image/pic_2024_4_19_coroutine_1_5.png" alt="协程示例图片1-5"></p>
+<p>假设现在 <code>x()</code> 执行到其挂起点，挂起了协程并且没有销毁其激活帧，之后执行返回给 <code>f()</code>。</p>
+<p>这会导致 <code>x()</code> 的其中一部分，即栈帧，从栈上弹出，同时将协程帧保留在堆上。当协程首次挂起时，一个返回值会返回给调用方。这个返回值通常会包括一个挂起的协程帧句柄，以在之后恢复这个协程。当 <code>x()</code> 挂起时，还会将恢复点存储到协程帧中（恢复点称为 <code>RP</code> ）。</p>
+<p><img src="/image/pic_2024_4_19_coroutine_1_6.png" alt="协程示例图片1-6"></p>
+<p>这个句柄可以在函数之间作为一个正常值传递。在稍后的某个时间点，可能会有某个东西（比如说 <code>h()</code> ），它可能来自不同的调用栈，甚至可能来自不同的线程——它会决定要恢复协程的执行。例如，当一个异步IO操作完成的时候。</p>
+<p>这个函数通过调用 <code>void resume(handle)</code> 来恢复协程的执行。对于调用者来说，这就像调用其他任意的单参数无返回值的函数一样。</p>
+<p>这会创建一个新的栈帧，其中记录 <code>resume()</code> 调用者的返回地址，将协程帧的地址加载进寄存器以将其激活，并使用协程帧中记录的恢复点来恢复 <code>x()</code> 的执行。</p>
+<p><img src="/image/pic_2024_4_19_coroutine_1_7.png" alt="协程示例图片1-7"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>上文将协程描述为一个“普通”函数的泛化，相对于普通函数提供的“调用”和“返回”这两个操作外，协程还提供了三个额外的操作——“挂起”、“恢复”和“销毁”。</p>
+<p>我希望这能对如何思考协程即其控制流程提供一些有用的思维框架。</p>
+<p>在下一篇文章中，我将介绍 C++ Coroutine TS 语言扩展的机制，并解释编译器是如何将你写的代码转换到协程的。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://FerociousMagikarp.github.io">Ferocious Magikarp</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://ferociousmagikarp.github.io/2024/04/19/cpp%E5%8D%8F%E7%A8%8B%E7%90%86%E8%AE%BA/">https://ferociousmagikarp.github.io/2024/04/19/cpp%E5%8D%8F%E7%A8%8B%E7%90%86%E8%AE%BA/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://FerociousMagikarp.github.io" target="_blank">鲤鱼王的个人想法记录</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/">计算机</a><a class="post-meta__tags" href="/tags/C/">C++</a><a class="post-meta__tags" href="/tags/%E5%8D%8F%E7%A8%8B/">协程</a><a class="post-meta__tags" href="/tags/%E5%8D%9A%E5%AE%A2%E7%BF%BB%E8%AF%91/">博客翻译</a></div><div class="post_share"><div class="social-share" data-image="/image/head.png" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2023/08/25/%E9%80%B8%E5%91%A8%E4%B9%A6-%E4%B8%96%E4%BF%98%E8%A7%A3/" title="《逸周书·世俘解》"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">《逸周书·世俘解》</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2023/07/30/cpp17%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7%E8%AE%B0%E5%BD%95/" title="C++17语言特性记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-07-30</div><div class="title">C++17语言特性记录</div></div></a></div><div><a href="/2023/08/01/cpp20%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7%E8%AE%B0%E5%BD%95/" title="C++20语言特性记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-01</div><div class="title">C++20语言特性记录</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/image/head.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Ferocious Magikarp</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/FerociousMagikarp"><i class="fab fa-github"></i><span>个人没啥价值的主页</span></a></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%8F%E7%A8%8B%E5%B0%B1%E6%98%AF%E5%87%BD%E6%95%B0%E5%B0%B1%E6%98%AF%E5%8D%8F%E7%A8%8B"><span class="toc-text">协程就是函数就是协程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E2%80%9C%E6%99%AE%E9%80%9A%E2%80%9D%E5%87%BD%E6%95%B0"><span class="toc-text">“普通”函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BF%80%E6%B4%BB%E5%B8%A7"><span class="toc-text">激活帧</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%80%9C%E8%B0%83%E7%94%A8%E2%80%9D%E6%93%8D%E4%BD%9C"><span class="toc-text">“调用”操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%80%9C%E8%BF%94%E5%9B%9E%E2%80%9D%E6%93%8D%E4%BD%9C"><span class="toc-text">“返回”操作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%8F%E7%A8%8B"><span class="toc-text">协程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%8F%E7%A8%8B%E6%BF%80%E6%B4%BB%E5%B8%A7"><span class="toc-text">协程激活帧</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%80%9C%E6%8C%82%E8%B5%B7%E2%80%9D%E6%93%8D%E4%BD%9C"><span class="toc-text">“挂起”操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%80%9C%E6%81%A2%E5%A4%8D%E2%80%9D%E6%93%8D%E4%BD%9C"><span class="toc-text">“恢复”操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%80%9C%E9%94%80%E6%AF%81%E2%80%9D%E6%93%8D%E4%BD%9C"><span class="toc-text">“销毁”操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%8F%E7%A8%8B%E7%9A%84%E2%80%9C%E8%B0%83%E7%94%A8%E2%80%9D%E6%93%8D%E4%BD%9C"><span class="toc-text">协程的“调用”操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%8F%E7%A8%8B%E7%9A%84%E2%80%9C%E8%BF%94%E5%9B%9E%E2%80%9D%E6%93%8D%E4%BD%9C"><span class="toc-text">协程的“返回”操作</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B"><span class="toc-text">示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2024 By Ferocious Magikarp</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
