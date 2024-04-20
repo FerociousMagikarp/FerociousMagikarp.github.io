@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>C++协程理论 | 鲤鱼王的个人想法记录</title><meta name="author" content="Ferocious Magikarp"><meta name="copyright" content="Ferocious Magikarp"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="原文来自coroutine-theory，这里只是小小地翻译一下。以下正文： 这是关于 C++ Coroutine TS 系列文章的第一篇，协程是一个新的语言特性，正在纳入C++20的语言标准（这篇文章是2017年写的，现在各大编译器都支持协程了——译注）。 在这个系列中，我将会介绍C++协程底层工作原理，并展示怎么用协程构建高级抽象，正如cppcoro库所提供的那样。 在这篇文章中，我将描述函数">
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>C++协程理论 | 鲤鱼王的个人想法记录</title><meta name="author" content="Ferocious Magikarp"><meta name="copyright" content="Ferocious Magikarp"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="原文来自coroutine-theory，这里只是小小地翻译一下。以下正文： 这是关于 C++ Coroutine TS 系列文章的第一篇，协程是一个新的语言特性，正在纳入C++20的语言标准（这篇文章是2017年写的，现在各大编译器都支持协程了——译注）。 在这个系列中，我将会介绍C++协程底层工作原理，并展示怎么用协程构建高级抽象，正如cppcoro库所提供的那样。 在这篇文章中，我将描述函数">
 <meta property="og:type" content="article">
 <meta property="og:title" content="C++协程理论">
 <meta property="og:url" content="https://ferociousmagikarp.github.io/2024/04/19/cpp%E5%8D%8F%E7%A8%8B%E7%90%86%E8%AE%BA/index.html">
@@ -142,7 +142,7 @@
       win.activateLightMode = function () {
         document.documentElement.setAttribute('data-theme', 'light')
         if (document.querySelector('meta[name="theme-color"]') !== null) {
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
         }
       }
       const t = saveToLocal.get('theme')
