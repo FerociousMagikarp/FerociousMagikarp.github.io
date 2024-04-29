@@ -1,12 +1,19 @@
 const canvas = document.getElementById('snakeCanvas');
 const ctx = canvas.getContext('2d');
 
-const boxSize = 20;
-const canvasSize = 500;
+let screenW = document.documentElement.clientWidth;
+let screenH = document.documentElement.clientHeight;
+let defaultSize = 500;
+
+const canvasSize = Math.min(screenW, screenH, defaultSize);
+const boxSize = canvasSize / 20;
 const snake = [];
 let direction = 'right';
 let food = {};
 let can_control = true;
+
+canvas.width = canvasSize;
+canvas.height = canvasSize;
 
 function drawSnakePart(x, y) {
     ctx.fillStyle = 'green';
