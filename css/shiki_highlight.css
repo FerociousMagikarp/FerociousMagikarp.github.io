@@ -1,0 +1,107 @@
+/* 代码块容器 */
+.code-block {
+  margin: 1rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #0d1117;        /* 这个背景会透过透明代码块显示 */
+  border: 1px solid #30363d;
+}
+
+/* 头部 */
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #161b22;
+  border-bottom: 1px solid #30363d;
+  font-size: 0.95rem;
+  color: #c9d1d9;
+}
+
+.code-lang {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* 复制按钮 */
+.copy-btn {
+  background: transparent;
+  color: #8b949e;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.copy-btn:hover {
+  color: #c9d1d9;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.copy-btn .check-icon {
+  display: none;
+}
+.copy-btn.copied .copy-icon {
+  display: none;
+}
+.copy-btn.copied .check-icon {
+  display: block;
+}
+
+/* 代码主体 - 背景透明，让 .code-block 的背景自然填充 */
+pre.shiki {
+  font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  tab-size: 4;
+  padding: 0.8rem 0;
+  margin: 0;
+  overflow-x: auto;
+  background-color: transparent !important;   /* 强制透明 */
+  color: #c9d1d9;
+}
+
+/* 行号 */
+pre.shiki code {
+  counter-reset: step;
+  counter-increment: step 0;
+  display: block;
+}
+
+pre.shiki code .line {
+  counter-increment: step;
+  display: block;
+  padding: 0 1rem;
+  min-height: 1.6em;
+}
+
+pre.shiki code .line::before {
+  content: counter(step);
+  display: inline-block;
+  width: 2rem;
+  margin-right: 1rem;
+  text-align: right;
+  color: #6e7681;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+pre.shiki code .line:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+/* 行内代码（``包裹的部分）—— 改为 DeepSeek 风格的柔和配色 */
+/* :not(pre) > code {
+  background: #1c2128;
+  color: #c9d1d9;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  border: 1px solid #30363d;
+} */
