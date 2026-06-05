@@ -1,0 +1,587 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>cpp23语言特性记录 | 鲤鱼王的记录小宇宙</title><meta name="author" content="Ferocious Magikarp"><meta name="copyright" content="Ferocious Magikarp"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="前言 记录来自 这里 的 C++23 语言特性。只是拙劣地翻译一下，可以点击前面的链接查看原文。 正文 C++23语言特性 consteval if 编写在常量求值期间实例化的代码。                            C++">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cpp23语言特性记录">
+<meta property="og:url" content="https://ferociousmagikarp.github.io/posts/ba290668/index.html">
+<meta property="og:site_name" content="鲤鱼王的记录小宇宙">
+<meta property="og:description" content="前言 记录来自 这里 的 C++23 语言特性。只是拙劣地翻译一下，可以点击前面的链接查看原文。 正文 C++23语言特性 consteval if 编写在常量求值期间实例化的代码。                            C++">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ferociousmagikarp.github.io/image/head.png">
+<meta property="article:published_time" content="2026-06-05T14:40:11.000Z">
+<meta property="article:modified_time" content="2026-06-05T14:40:11.000Z">
+<meta property="article:author" content="Ferocious Magikarp">
+<meta property="article:tag" content="计算机">
+<meta property="article:tag" content="C++">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ferociousmagikarp.github.io/image/head.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "cpp23语言特性记录",
+  "url": "https://ferociousmagikarp.github.io/posts/ba290668/",
+  "image": "https://ferociousmagikarp.github.io/image/head.png",
+  "datePublished": "2026-06-05T14:40:11.000Z",
+  "dateModified": "2026-06-05T14:40:11.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Ferocious Magikarp",
+      "url": "https://ferociousmagikarp.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/image/favicon.png"><link rel="canonical" href="https://ferociousmagikarp.github.io/posts/ba290668/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":null,"highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: false,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'cpp23语言特性记录',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/background.css"><link rel="stylesheet" href="/css/shiki_highlight.css"><meta name="generator" content="Hexo 7.3.0"><link href="https://cdn.bootcss.com/KaTeX/0.11.1/katex.min.css" rel="stylesheet" /></head><body><div class="bg-animation" id="web_bg" style="background-image: url(/image/galaxy.webp);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/image/head.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">32</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">鲤鱼王的记录小宇宙</span></a><a class="nav-page-title" href="/"><span class="site-name">cpp23语言特性记录</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">cpp23语言特性记录</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-05T14:40:11.000Z" title="发表于 2026-06-05 22:40:11">2026-06-05</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-05T14:40:11.000Z" title="更新于 2026-06-05 22:40:11">2026-06-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/C/">C++</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>10分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1>前言</h1>
+<p>记录来自 <a target="_blank" rel="noopener" href="https://github.com/AnthonyCalandra/modern-cpp-features/blob/master/CPP23.md">这里</a> 的 C++23 语言特性。只是拙劣地翻译一下，可以点击前面的链接查看原文。</p>
+<h1>正文</h1>
+<h2 id="c-23语言特性">C++23语言特性</h2>
+<h3 id="consteval-if">consteval if</h3>
+<p>编写在常量求值期间实例化的代码。</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#C792EA">consteval</span><span style="color:#C792EA"> int</span><span style="color:#82AAFF"> f</span><span style="color:#89DDFF">(</span><span style="color:#C792EA">int</span><span style="color:#EEFFFF;font-style:italic"> i</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span><span style="color:#89DDFF;font-style:italic"> return</span><span style="color:#EEFFFF"> i</span><span style="color:#89DDFF">;</span><span style="color:#89DDFF"> }</span></span><span class="line"></span><span class="line"><span style="color:#C792EA">constexpr</span><span style="color:#C792EA"> int</span><span style="color:#82AAFF"> g</span><span style="color:#89DDFF">(</span><span style="color:#C792EA">int</span><span style="color:#EEFFFF;font-style:italic"> i</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">  if</span><span style="color:#C792EA"> consteval</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">      return</span><span style="color:#82AAFF"> f</span><span style="color:#89DDFF">(</span><span style="color:#F07178">i</span><span style="color:#89DDFF">);</span></span><span class="line"><span style="color:#89DDFF">  }</span><span style="color:#89DDFF;font-style:italic"> else</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">      return</span><span style="color:#F78C6C"> 42</span><span style="color:#89DDFF">;</span></span><span class="line"><span style="color:#89DDFF">  }</span></span><span class="line"><span style="color:#89DDFF">}</span></span></code></pre>
+        <template class="raw-code">consteval int f(int i) { return i; }
+
+constexpr int g(int i) {
+  if consteval {
+      return f(i);
+  } else {
+      return 42;
+  }
+}</template>
+      </div>
+<blockquote>
+<p><strong>译者的理解</strong>：一般这种需要区分编译期还是运行时的需求，是在 <code>constexpr</code> 函数里的。这种函数编译期运行时都能用，有时候可能运行时需要一些优化什么的，而编译期不允许这么做，就得区分开。在 C++20 的时候，有个函数 <code>std::is_constant_evaluated</code>，用以区分。但是这个只是个普通函数，用 <code>if</code> 判断，结果两个分支都会需要编译期实例化，导致不能处理一些运行时优化。现在有了 <code>if consteval</code>，这个问题就迎刃而解了。编译期只会实例化编译期的分支，就可以在运行时分支塞一些奇怪的优化了。</p>
+</blockquote>
+<h3 id="deducing-this">Deducing this</h3>
+<p>C++23 引入的显式对象成员函数，现在可以通过在成员函数的首个参数前添加 <code>this</code> 关键字，来推导对象的类型和值类别：</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#32CD32;font-style:italic">// 使用 Deducing this 的新做法:</span></span><span class="line"><span style="color:#C792EA">struct</span><span style="color:#FFCB6B"> T</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#82AAFF">  decltype</span><span style="color:#89DDFF">(</span><span style="color:#C792EA">auto</span><span style="color:#89DDFF">)</span><span style="color:#F78C6C"> operator</span><span style="color:#FFCB6B">[]</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">this</span><span style="color:#C792EA"> auto&#x26;</span><span style="color:#EEFFFF;font-style:italic"> self</span><span style="color:#89DDFF">,</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#C792EA">size_t</span><span style="color:#EEFFFF;font-style:italic"> idx</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span><span style="color:#F07178"></span></span><span class="line"><span style="color:#89DDFF;font-style:italic">    return</span><span style="color:#EEFFFF"> self</span><span style="color:#89DDFF">.</span><span style="color:#EEFFFF">mVector</span><span style="color:#89DDFF">[</span><span style="color:#F07178">idx</span><span style="color:#89DDFF">];</span><span style="color:#F07178"></span></span><span class="line"><span style="color:#89DDFF">  }</span></span><span class="line"><span style="color:#F07178">}</span><span style="color:#89DDFF">;</span></span><span class="line"></span><span class="line"><span style="color:#32CD32;font-style:italic">// 老做法:</span></span><span class="line"><span style="color:#C792EA">struct</span><span style="color:#FFCB6B"> T</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#FFCB6B">  value_t</span><span style="color:#C792EA">&#x26;</span><span style="color:#F78C6C"> operator</span><span style="color:#FFCB6B">[]</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#C792EA">size_t</span><span style="color:#EEFFFF;font-style:italic"> idx</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">    return</span><span style="color:#EEFFFF"> mVector</span><span style="color:#89DDFF">[</span><span style="color:#F07178">idx</span><span style="color:#89DDFF">];</span></span><span class="line"><span style="color:#89DDFF">  }</span></span><span class="line"><span style="color:#C792EA">  const</span><span style="color:#FFCB6B"> value_t</span><span style="color:#C792EA">&#x26;</span><span style="color:#F78C6C"> operator</span><span style="color:#FFCB6B">[]</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#C792EA">size_t</span><span style="color:#EEFFFF;font-style:italic"> idx</span><span style="color:#89DDFF">)</span><span style="color:#C792EA"> const</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">    return</span><span style="color:#EEFFFF"> mVector</span><span style="color:#89DDFF">[</span><span style="color:#F07178">idx</span><span style="color:#89DDFF">];</span></span><span class="line"><span style="color:#89DDFF">  }</span></span><span class="line"><span style="color:#89DDFF">};</span></span></code></pre>
+        <template class="raw-code">// &#x4F7F;&#x7528; Deducing this &#x7684;&#x65B0;&#x505A;&#x6CD5;:
+struct T {
+  decltype(auto) operator[](this auto&amp; self, std::size_t idx) { 
+    return self.mVector[idx]; 
+  }
+};
+
+// &#x8001;&#x505A;&#x6CD5;:
+struct T {
+  value_t&amp; operator[](std::size_t idx) {
+    return mVector[idx];
+  }
+  const value_t&amp; operator[](std::size_t idx) const {
+    return mVector[idx];
+  }
+};</template>
+      </div>
+<blockquote>
+<p><strong>译者的理解</strong>：这个 Deducing this 还有个用途就是用在奇异递归模板（CRTP）上。之前写 CRTP 的话，得把基类搞成模板类，然后再 <code>static_cast&lt;Derived*&gt;(this)</code> 再调用函数，很繁琐。而且为了减少二进制体积，还得把一些普通函数拆出去，再搞一个基类。现在不需要这么麻烦了，现在的例子：</p>
+</blockquote>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#32CD32;font-style:italic">// 以前的做法：</span></span><span class="line"><span style="color:#C792EA">template</span><span style="color:#89DDFF"> &#x3C;</span><span style="color:#C792EA">typename</span><span style="color:#FFCB6B"> Derived</span><span style="color:#89DDFF">></span></span><span class="line"><span style="color:#C792EA">struct</span><span style="color:#FFCB6B"> Base</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#C792EA">    void</span><span style="color:#82AAFF"> do_something</span><span style="color:#89DDFF">()</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#32CD32;font-style:italic">        // 得强转类型，如果继承树大一点再转错了什么的</span></span><span class="line"><span style="color:#89DDFF">        static_cast&#x3C;</span><span style="color:#F07178">Derived</span><span style="color:#89DDFF">*>(this)-></span><span style="color:#82AAFF">impl</span><span style="color:#89DDFF">();</span></span><span class="line"><span style="color:#89DDFF">    }</span></span><span class="line"><span style="color:#89DDFF">};</span></span><span class="line"></span><span class="line"><span style="color:#32CD32;font-style:italic">// 继承的时候得把自己的类型填到基类模板里</span></span><span class="line"><span style="color:#C792EA">struct</span><span style="color:#FFCB6B"> Derived</span><span style="color:#89DDFF"> :</span><span style="color:#F07178"> Base</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#FFCB6B">Derived</span><span style="color:#89DDFF">></span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#C792EA">    void</span><span style="color:#82AAFF"> impl</span><span style="color:#89DDFF">()</span><span style="color:#89DDFF"> {</span><span style="color:#32CD32;font-style:italic"> /* ... */</span><span style="color:#89DDFF"> }</span></span><span class="line"><span style="color:#89DDFF">};</span></span><span class="line"></span><span class="line"><span style="color:#32CD32;font-style:italic">// 现在的做法</span></span><span class="line"><span style="color:#C792EA">struct</span><span style="color:#FFCB6B"> Base</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#C792EA">    template</span><span style="color:#89DDFF"> &#x3C;</span><span style="color:#C792EA">typename</span><span style="color:#FFCB6B"> Self</span><span style="color:#89DDFF">></span></span><span class="line"><span style="color:#C792EA">    void</span><span style="color:#82AAFF"> do_something</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">this</span><span style="color:#FFCB6B"> Self</span><span style="color:#C792EA">&#x26;&#x26;</span><span style="color:#EEFFFF;font-style:italic"> self</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#32CD32;font-style:italic">        // 甚至还能做完美转发，之前这种函数得写一堆，就懒得写了</span></span><span class="line"><span style="color:#FFCB6B">        std</span><span style="color:#89DDFF">::</span><span style="color:#82AAFF">forward</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#FFCB6B">Self</span><span style="color:#89DDFF">>(</span><span style="color:#F07178">self</span><span style="color:#89DDFF">).</span><span style="color:#82AAFF">impl</span><span style="color:#89DDFF">();</span></span><span class="line"><span style="color:#89DDFF">    }</span></span><span class="line"><span style="color:#89DDFF">};</span></span><span class="line"></span><span class="line"><span style="color:#32CD32;font-style:italic">// 基类不需要是模板类了！哪个函数使用子类就把哪个函数搞成模板函数就行</span></span><span class="line"><span style="color:#C792EA">struct</span><span style="color:#FFCB6B"> Derived</span><span style="color:#89DDFF"> :</span><span style="color:#F07178"> Base </span><span style="color:#89DDFF">{</span></span><span class="line"><span style="color:#C792EA">    void</span><span style="color:#82AAFF"> impl</span><span style="color:#89DDFF">()</span><span style="color:#89DDFF"> {</span><span style="color:#32CD32;font-style:italic"> /* ... */</span><span style="color:#89DDFF"> }</span></span><span class="line"><span style="color:#89DDFF">};</span></span></code></pre>
+        <template class="raw-code">// &#x4EE5;&#x524D;&#x7684;&#x505A;&#x6CD5;&#xFF1A;
+template &lt;typename Derived&gt;
+struct Base {
+    void do_something() {
+        // &#x5F97;&#x5F3A;&#x8F6C;&#x7C7B;&#x578B;&#xFF0C;&#x5982;&#x679C;&#x7EE7;&#x627F;&#x6811;&#x5927;&#x4E00;&#x70B9;&#x518D;&#x8F6C;&#x9519;&#x4E86;&#x4EC0;&#x4E48;&#x7684;
+        static_cast&lt;Derived*&gt;(this)-&gt;impl();
+    }
+};
+
+// &#x7EE7;&#x627F;&#x7684;&#x65F6;&#x5019;&#x5F97;&#x628A;&#x81EA;&#x5DF1;&#x7684;&#x7C7B;&#x578B;&#x586B;&#x5230;&#x57FA;&#x7C7B;&#x6A21;&#x677F;&#x91CC;
+struct Derived : Base&lt;Derived&gt; {
+    void impl() { /* ... */ }
+};
+
+// &#x73B0;&#x5728;&#x7684;&#x505A;&#x6CD5;
+struct Base {
+    template &lt;typename Self&gt;
+    void do_something(this Self&amp;&amp; self) {
+        // &#x751A;&#x81F3;&#x8FD8;&#x80FD;&#x505A;&#x5B8C;&#x7F8E;&#x8F6C;&#x53D1;&#xFF0C;&#x4E4B;&#x524D;&#x8FD9;&#x79CD;&#x51FD;&#x6570;&#x5F97;&#x5199;&#x4E00;&#x5806;&#xFF0C;&#x5C31;&#x61D2;&#x5F97;&#x5199;&#x4E86;
+        std::forward&lt;Self&gt;(self).impl();
+    }
+};
+
+// &#x57FA;&#x7C7B;&#x4E0D;&#x9700;&#x8981;&#x662F;&#x6A21;&#x677F;&#x7C7B;&#x4E86;&#xFF01;&#x54EA;&#x4E2A;&#x51FD;&#x6570;&#x4F7F;&#x7528;&#x5B50;&#x7C7B;&#x5C31;&#x628A;&#x54EA;&#x4E2A;&#x51FD;&#x6570;&#x641E;&#x6210;&#x6A21;&#x677F;&#x51FD;&#x6570;&#x5C31;&#x884C;
+struct Derived : Base {
+    void impl() { /* ... */ }
+};</template>
+      </div>
+<h3 id="多维下标运算符重载">多维下标运算符重载</h3>
+<p>在 <code>operator []</code> 运算符中可以指定 0 或更多参数：</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#C792EA">template</span><span style="color:#89DDFF"> &#x3C;</span><span style="color:#C792EA">typename</span><span style="color:#FFCB6B"> T</span><span style="color:#89DDFF">,</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#C792EA">size_t</span><span style="color:#FFCB6B"> Z</span><span style="color:#89DDFF">,</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#C792EA">size_t</span><span style="color:#FFCB6B"> Y</span><span style="color:#89DDFF">,</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#C792EA">size_t</span><span style="color:#FFCB6B"> X</span><span style="color:#89DDFF">></span></span><span class="line"><span style="color:#C792EA">struct</span><span style="color:#FFCB6B"> Array3d</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#FFCB6B">  std</span><span style="color:#89DDFF">::</span><span style="color:#F07178">array</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#F07178">T</span><span style="color:#89DDFF">,</span><span style="color:#F07178"> X </span><span style="color:#89DDFF">*</span><span style="color:#F07178"> Y </span><span style="color:#89DDFF">*</span><span style="color:#F07178"> Z</span><span style="color:#89DDFF">></span><span style="color:#F07178"> m</span><span style="color:#89DDFF">{};</span></span><span class="line"></span><span class="line"><span style="color:#FFCB6B">  T</span><span style="color:#C792EA">&#x26;</span><span style="color:#F78C6C"> operator</span><span style="color:#FFCB6B">[]</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#C792EA">size_t</span><span style="color:#EEFFFF;font-style:italic"> z</span><span style="color:#89DDFF">,</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#C792EA">size_t</span><span style="color:#EEFFFF;font-style:italic"> y</span><span style="color:#89DDFF">,</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#C792EA">size_t</span><span style="color:#EEFFFF;font-style:italic"> x</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">      return</span><span style="color:#EEFFFF"> m</span><span style="color:#89DDFF">[</span><span style="color:#F07178">z </span><span style="color:#89DDFF">*</span><span style="color:#F07178"> Y </span><span style="color:#89DDFF">*</span><span style="color:#F07178"> X </span><span style="color:#89DDFF">+</span><span style="color:#F07178"> y </span><span style="color:#89DDFF">*</span><span style="color:#F07178"> X </span><span style="color:#89DDFF">+</span><span style="color:#F07178"> x</span><span style="color:#89DDFF">];</span></span><span class="line"><span style="color:#89DDFF">  }</span></span><span class="line"><span style="color:#89DDFF">};</span></span><span class="line"></span><span class="line"><span style="color:#EEFFFF">Array3d</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">int</span><span style="color:#89DDFF">,</span><span style="color:#F78C6C"> 4</span><span style="color:#89DDFF">,</span><span style="color:#F78C6C"> 3</span><span style="color:#89DDFF">,</span><span style="color:#F78C6C"> 2</span><span style="color:#89DDFF">></span><span style="color:#EEFFFF"> v</span><span style="color:#89DDFF">;</span></span><span class="line"><span style="color:#EEFFFF">v</span><span style="color:#89DDFF">[</span><span style="color:#F78C6C">3</span><span style="color:#89DDFF">,</span><span style="color:#F78C6C"> 2</span><span style="color:#89DDFF">,</span><span style="color:#F78C6C"> 1</span><span style="color:#89DDFF">]</span><span style="color:#89DDFF"> =</span><span style="color:#F78C6C"> 42</span><span style="color:#89DDFF">;</span></span></code></pre>
+        <template class="raw-code">template &lt;typename T, std::size_t Z, std::size_t Y, std::size_t X&gt;
+struct Array3d {
+  std::array&lt;T, X * Y * Z&gt; m{};
+
+  T&amp; operator[](std::size_t z, std::size_t y, std::size_t x) {
+      return m[z * Y * X + y * X + x];
+  }
+};
+
+Array3d&lt;int, 4, 3, 2&gt; v;
+v[3, 2, 1] = 42;</template>
+      </div>
+<blockquote>
+<p><strong>译者的理解</strong>：C++ 这门语言确实比较逆天，之前重载中括号只让有一个参数。结果这种多维坐标的我都拿小括号，非常丑。终于在 C++23 能够用上多个参数的重载中括号了🤡</p>
+</blockquote>
+<h3 id="提升范围-for-循环的安全性">提升范围 for 循环的安全性</h3>
+<p>修复了 C++ 中一种非常重要的控制结构的一些臭名昭著的问题。<br>
+下面是一些代码片段的实例，这些代码在 C++23 之前无法正常运行，现在已经修复：</p>
+<ul>
+<li><code>for (auto e : getTmp().getRef())</code></li>
+<li><code>for (auto e : getVector()[0])</code></li>
+<li><code>for (auto valueElem : getMap()[&quot;key&quot;])</code></li>
+<li><code>for (auto e : get&lt;0&gt;(getTuple()))</code></li>
+<li><code>for (auto e : getOptionalCollection().value())</code></li>
+<li><code>for (char c : get&lt;std::string&gt;(getVariant()))</code></li>
+</ul>
+<h2 id="c-23库特性">C++23库特性</h2>
+<h3 id="堆栈追踪库">堆栈追踪库</h3>
+<p>堆栈追踪是对调用序列的近似表示，是由多个堆栈追踪条目组成的。一个堆栈追踪条目 （表示成 <code>std::stacktrace_entry</code>）包含源文件、行号以及描述字段等信息。</p>
+<p>一个 Linux 系统上的输出示例：</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#89DDFF;font-style:italic">#include</span><span style="color:#89DDFF"> &#x3C;</span><span style="color:#C3E88D">print</span><span style="color:#89DDFF">></span></span><span class="line"><span style="color:#89DDFF;font-style:italic">#include</span><span style="color:#89DDFF"> &#x3C;</span><span style="color:#C3E88D">stacktrace</span><span style="color:#89DDFF">></span></span><span class="line"></span><span class="line"><span style="color:#C792EA">int</span><span style="color:#82AAFF"> main</span><span style="color:#89DDFF">()</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#FFCB6B">    std</span><span style="color:#89DDFF">::</span><span style="color:#82AAFF">println</span><span style="color:#89DDFF">(</span><span style="color:#89DDFF">"</span><span style="color:#C3E88D">{}</span><span style="color:#89DDFF">"</span><span style="color:#89DDFF">,</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#FFCB6B">stacktrace</span><span style="color:#89DDFF">::</span><span style="color:#82AAFF">current</span><span style="color:#89DDFF">());</span></span><span class="line"><span style="color:#89DDFF">}</span></span></code></pre>
+        <template class="raw-code">#include &lt;print&gt;
+#include &lt;stacktrace&gt;
+
+int main() {
+    std::println(&quot;{}&quot;, std::stacktrace::current());
+}</template>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">Text</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span>0#  main at /app/example.cpp:5 [0x5ee42e3db747]</span></span><span class="line"><span>1#  &#x3C;unknown> [0x76e76dc29d8f]</span></span><span class="line"><span>2#  __libc_start_main [0x76e76dc29e3f]</span></span><span class="line"><span>3#  _start [0x5ee42e3db644]</span></span></code></pre>
+        <template class="raw-code">0#  main at /app/example.cpp:5 [0x5ee42e3db747]
+1#  &lt;unknown&gt; [0x76e76dc29d8f]
+2#  __libc_start_main [0x76e76dc29e3f]
+3#  _start [0x5ee42e3db644]</template>
+      </div>
+<h3 id="string-和-string-view-的-contains-函数">string 和 string view 的 contains 函数</h3>
+<p>一个简单的查询函数，用来查询一个字串是否包含在字符串（string）或者字符串视图（string view）中：</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#EEFFFF">string</span><span style="color:#89DDFF">{</span><span style="color:#89DDFF">"</span><span style="color:#C3E88D">foobarbaz</span><span style="color:#89DDFF">"</span><span style="color:#89DDFF">}</span><span style="color:#EEFFFF">.</span><span style="color:#82AAFF">contains</span><span style="color:#89DDFF">(</span><span style="color:#89DDFF">"</span><span style="color:#C3E88D">bar</span><span style="color:#89DDFF">"</span><span style="color:#89DDFF">);</span><span style="color:#32CD32;font-style:italic"> // == true</span></span><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#EEFFFF">string</span><span style="color:#89DDFF">{</span><span style="color:#89DDFF">"</span><span style="color:#C3E88D">foobarbaz</span><span style="color:#89DDFF">"</span><span style="color:#89DDFF">}</span><span style="color:#EEFFFF">.</span><span style="color:#82AAFF">contains</span><span style="color:#89DDFF">(</span><span style="color:#89DDFF">"</span><span style="color:#C3E88D">bat</span><span style="color:#89DDFF">"</span><span style="color:#89DDFF">);</span><span style="color:#32CD32;font-style:italic"> // == false</span></span></code></pre>
+        <template class="raw-code">std::string{&quot;foobarbaz&quot;}.contains(&quot;bar&quot;); // == true
+std::string{&quot;foobarbaz&quot;}.contains(&quot;bat&quot;); // == false</template>
+      </div>
+<blockquote>
+<p><strong>译者的理解</strong>：字符串终于也有 <code>contains</code> 了，不用再写 <code>if (str.find(&quot;aaa&quot;) != std::string::npos)</code> 了🤡</p>
+</blockquote>
+<h3 id="std-to-underlying">std::to_underlying</h3>
+<p>支持将枚举类型转为其底层类型：</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#C792EA">enum</span><span style="color:#C792EA"> class</span><span style="color:#FFCB6B"> MyEnum</span><span style="color:#89DDFF"> :</span><span style="color:#C792EA"> int</span><span style="color:#89DDFF"> {</span><span style="color:#EEFFFF"> A</span><span style="color:#89DDFF"> =</span><span style="color:#F78C6C"> 1</span><span style="color:#89DDFF">,</span><span style="color:#EEFFFF"> B</span><span style="color:#89DDFF">,</span><span style="color:#EEFFFF"> C</span><span style="color:#89DDFF"> };</span></span><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#82AAFF">to_underlying</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">MyEnum</span><span style="color:#89DDFF">::</span><span style="color:#EEFFFF">A</span><span style="color:#89DDFF">);</span><span style="color:#32CD32;font-style:italic"> // == 1</span></span><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#82AAFF">to_underlying</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">MyEnum</span><span style="color:#89DDFF">::</span><span style="color:#EEFFFF">C</span><span style="color:#89DDFF">);</span><span style="color:#32CD32;font-style:italic"> // == 3</span></span></code></pre>
+        <template class="raw-code">enum class MyEnum : int { A = 1, B, C };
+std::to_underlying(MyEnum::A); // == 1
+std::to_underlying(MyEnum::C); // == 3</template>
+      </div>
+<h3 id="spanstream">spanstream</h3>
+<p>一种使用字符数组作为外部缓冲区的 <code>strstream</code> 的替代方案。该缓冲区不涉及所有权转移或重新分配。</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#C792EA">char</span><span style="color:#EEFFFF"> input[] </span><span style="color:#89DDFF">=</span><span style="color:#89DDFF"> "</span><span style="color:#C3E88D">10 20 30</span><span style="color:#89DDFF">"</span><span style="color:#89DDFF">;</span></span><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#EEFFFF">ispanstream is</span><span style="color:#89DDFF">{</span><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#F07178">span</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">char</span><span style="color:#89DDFF">>{</span><span style="color:#F07178">input</span><span style="color:#89DDFF">}};</span></span><span class="line"><span style="color:#C792EA">int</span><span style="color:#EEFFFF"> i</span><span style="color:#89DDFF">;</span></span><span class="line"><span style="color:#EEFFFF">is </span><span style="color:#89DDFF">>></span><span style="color:#EEFFFF"> i</span><span style="color:#89DDFF">;</span><span style="color:#32CD32;font-style:italic"> // i == 10</span></span><span class="line"><span style="color:#EEFFFF">is </span><span style="color:#89DDFF">>></span><span style="color:#EEFFFF"> i</span><span style="color:#89DDFF">;</span><span style="color:#32CD32;font-style:italic"> // i == 20</span></span><span class="line"><span style="color:#EEFFFF">is </span><span style="color:#89DDFF">>></span><span style="color:#EEFFFF"> i</span><span style="color:#89DDFF">;</span><span style="color:#32CD32;font-style:italic"> // i == 30</span></span></code></pre>
+        <template class="raw-code">char input[] = &quot;10 20 30&quot;;
+std::ispanstream is{std::span&lt;char&gt;{input}};
+int i;
+is &gt;&gt; i; // i == 10
+is &gt;&gt; i; // i == 20
+is &gt;&gt; i; // i == 30</template>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#C792EA">char</span><span style="color:#EEFFFF"> output</span><span style="color:#89DDFF">[</span><span style="color:#F78C6C">30</span><span style="color:#89DDFF">]{};</span><span style="color:#32CD32;font-style:italic"> // zero-initialize array</span></span><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#EEFFFF">ospanstream os</span><span style="color:#89DDFF">{</span><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#F07178">span</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">char</span><span style="color:#89DDFF">>{</span><span style="color:#F07178">output</span><span style="color:#89DDFF">}};</span></span><span class="line"><span style="color:#EEFFFF">os </span><span style="color:#89DDFF">&#x3C;&#x3C;</span><span style="color:#F78C6C"> 10</span><span style="color:#89DDFF"> &#x3C;&#x3C;</span><span style="color:#F78C6C"> 20</span><span style="color:#89DDFF"> &#x3C;&#x3C;</span><span style="color:#F78C6C"> 30</span><span style="color:#89DDFF">;</span></span><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#EEFFFF">span</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">char</span><span style="color:#89DDFF">></span><span style="color:#EEFFFF"> sp </span><span style="color:#89DDFF">=</span><span style="color:#EEFFFF"> os</span><span style="color:#89DDFF">.</span><span style="color:#82AAFF">span</span><span style="color:#89DDFF">();</span></span></code></pre>
+        <template class="raw-code">char output[30]{}; // zero-initialize array
+std::ospanstream os{std::span&lt;char&gt;{output}};
+os &lt;&lt; 10 &lt;&lt; 20 &lt;&lt; 30;
+std::span&lt;char&gt; sp = os.span();</template>
+      </div>
+<h3 id="输入-输出指针">输入/输出指针</h3>
+<p><code>std::out_ptr</code> 和 <code>std::inout_ptr</code> 是一种抽象机制，通过创建一个临时的“指针到指针”变量，在销毁时更新智能指针，以同时支持 C 语言接口和智能指针。</p>
+<p>该机制还能在抛出异常时安全地管理相关内存的生命周期。</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#32CD32;font-style:italic">// p_handle 写</span></span><span class="line"><span style="color:#C792EA">int</span><span style="color:#82AAFF"> c_api_create_handle</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">MyHandle</span><span style="color:#C792EA">**</span><span style="color:#EEFFFF;font-style:italic"> p_handle</span><span style="color:#89DDFF">);</span></span><span class="line"><span style="color:#32CD32;font-style:italic">// p_handle 同时读写</span></span><span class="line"><span style="color:#C792EA">int</span><span style="color:#82AAFF"> c_api_recreate_handle</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">MyHandle</span><span style="color:#C792EA">**</span><span style="color:#EEFFFF;font-style:italic"> p_handle</span><span style="color:#89DDFF">);</span></span><span class="line"><span style="color:#C792EA">void</span><span style="color:#82AAFF"> c_api_delete_handle</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">MyHandle</span><span style="color:#C792EA">*</span><span style="color:#EEFFFF;font-style:italic"> handle</span><span style="color:#89DDFF">);</span></span><span class="line"></span><span class="line"><span style="color:#C792EA">struct</span><span style="color:#FFCB6B"> resource_deleter</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#C792EA">	void</span><span style="color:#F78C6C"> operator</span><span style="color:#FFCB6B">()</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">MyHandle</span><span style="color:#C792EA">*</span><span style="color:#EEFFFF;font-style:italic"> handle</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#82AAFF">		c_api_delete_handle</span><span style="color:#89DDFF">(</span><span style="color:#F07178">handle</span><span style="color:#89DDFF">);</span></span><span class="line"><span style="color:#89DDFF">	}</span></span><span class="line"><span style="color:#89DDFF">};</span></span><span class="line"></span><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#FFCB6B">unique_ptr</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#FFCB6B">MyHandle</span><span style="color:#89DDFF">,</span><span style="color:#FFCB6B"> resource_deleter</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> resource</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">nullptr</span><span style="color:#89DDFF">);</span></span><span class="line"><span style="color:#C792EA">int</span><span style="color:#EEFFFF"> err </span><span style="color:#89DDFF">=</span><span style="color:#82AAFF"> c_api_create_handle</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#82AAFF">out_ptr</span><span style="color:#89DDFF">(</span><span style="color:#EEFFFF">resource</span><span style="color:#89DDFF">));</span></span><span class="line"><span style="color:#32CD32;font-style:italic">// `resource` 现在在 `c_api_create_handle` 中独占内存所有权</span></span><span class="line"></span><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#FFCB6B">shared_ptr</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#FFCB6B">MyHandle</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> resource</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">nullptr</span><span style="color:#89DDFF">);</span></span><span class="line"><span style="color:#C792EA">int</span><span style="color:#EEFFFF"> err </span><span style="color:#89DDFF">=</span><span style="color:#82AAFF"> c_api_recreate_handle</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#82AAFF">inout_ptr</span><span style="color:#89DDFF">(</span><span style="color:#EEFFFF">resource</span><span style="color:#89DDFF">),</span><span style="color:#EEFFFF"> resource_deleter{}</span><span style="color:#89DDFF">);</span></span><span class="line"><span style="color:#32CD32;font-style:italic">// `resource` 现在在 `c_api_recreate_handle` 中共享内存所有权</span></span></code></pre>
+        <template class="raw-code">// p_handle &#x5199;
+int c_api_create_handle(MyHandle** p_handle);
+// p_handle &#x540C;&#x65F6;&#x8BFB;&#x5199;
+int c_api_recreate_handle(MyHandle** p_handle);
+void c_api_delete_handle(MyHandle* handle);
+
+struct resource_deleter {
+&#x9;void operator()(MyHandle* handle) {
+&#x9;&#x9;c_api_delete_handle(handle);
+&#x9;}
+};
+
+std::unique_ptr&lt;MyHandle, resource_deleter&gt; resource(nullptr);
+int err = c_api_create_handle(std::out_ptr(resource));
+// &grave;resource&grave; &#x73B0;&#x5728;&#x5728; &grave;c_api_create_handle&grave; &#x4E2D;&#x72EC;&#x5360;&#x5185;&#x5B58;&#x6240;&#x6709;&#x6743;
+
+std::shared_ptr&lt;MyHandle&gt; resource(nullptr);
+int err = c_api_recreate_handle(std::inout_ptr(resource), resource_deleter{});
+// &grave;resource&grave; &#x73B0;&#x5728;&#x5728; &grave;c_api_recreate_handle&grave; &#x4E2D;&#x5171;&#x4EAB;&#x5185;&#x5B58;&#x6240;&#x6709;&#x6743;</template>
+      </div>
+<h3 id="std-optional-的-monad-操作">std::optional 的 monad 操作</h3>
+<p>支持对 <code>std::optional</code> 的各种操作：<code>and_then</code>、<code>transform</code>、<code>or_else</code>。</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#FFCB6B">optional</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">int</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> parse_int</span><span style="color:#89DDFF">(</span><span style="color:#C792EA">const</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#FFCB6B">string</span><span style="color:#C792EA">&#x26;</span><span style="color:#89DDFF">);</span></span><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#FFCB6B">optional</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">int</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> ensure_non_negative</span><span style="color:#89DDFF">(</span><span style="color:#C792EA">int</span><span style="color:#89DDFF">);</span></span><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#FFCB6B">optional</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">double</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> default_value_or_empty</span><span style="color:#89DDFF">(</span><span style="color:#C792EA">double</span><span style="color:#89DDFF">);</span></span><span class="line"></span><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#FFCB6B">optional</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">double</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> stringToSqrtDouble</span><span style="color:#89DDFF">(</span><span style="color:#C792EA">const</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#FFCB6B">string</span><span style="color:#C792EA">&#x26;</span><span style="color:#EEFFFF;font-style:italic"> input</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">  return</span><span style="color:#82AAFF"> parse_int</span><span style="color:#89DDFF">(</span><span style="color:#EEFFFF">input</span><span style="color:#89DDFF">)</span></span><span class="line"><span style="color:#EEFFFF">    .</span><span style="color:#82AAFF">and_then</span><span style="color:#89DDFF">(</span><span style="color:#EEFFFF">ensure_non_negative</span><span style="color:#89DDFF">)</span></span><span class="line"><span style="color:#EEFFFF">    .</span><span style="color:#82AAFF">transform</span><span style="color:#89DDFF">([](</span><span style="color:#C792EA">int</span><span style="color:#EEFFFF;font-style:italic"> x</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">      return</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#82AAFF">sqrt</span><span style="color:#89DDFF">(</span><span style="color:#EEFFFF">x</span><span style="color:#89DDFF">);</span></span><span class="line"><span style="color:#89DDFF">    })</span></span><span class="line"><span style="color:#EEFFFF">    .</span><span style="color:#82AAFF">or_else</span><span style="color:#89DDFF">(</span><span style="color:#EEFFFF">default_value_or_empty</span><span style="color:#89DDFF">);</span></span><span class="line"><span style="color:#89DDFF">}</span></span></code></pre>
+        <template class="raw-code">std::optional&lt;int&gt; parse_int(const std::string&amp;);
+std::optional&lt;int&gt; ensure_non_negative(int);
+std::optional&lt;double&gt; default_value_or_empty(double);
+
+std::optional&lt;double&gt; stringToSqrtDouble(const std::string&amp; input) {
+  return parse_int(input)
+    .and_then(ensure_non_negative)
+    .transform([](int x) {
+      return std::sqrt(x);
+    })
+    .or_else(default_value_or_empty);
+}</template>
+      </div>
+<h3 id="std-expected">std::expected</h3>
+<p><code>std::expected</code> 能在同一个类型中表达一个预期值和一个潜在的错误值。它还支持对预期值和非预期值（即错误值）进行多种 monad 操作。</p>
+<p>使用 <code>std::unexpected</code> 来存储非预期值（即错误值）。</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#C792EA">enum</span><span style="color:#C792EA"> class</span><span style="color:#FFCB6B"> StringToSqrtDoubleError</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#EEFFFF">    ParseError</span><span style="color:#89DDFF">,</span><span style="color:#EEFFFF"> NegativeNumber</span></span><span class="line"><span style="color:#89DDFF">};</span></span><span class="line"></span><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#FFCB6B">expected</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">int</span><span style="color:#89DDFF">,</span><span style="color:#FFCB6B"> StringToSqrtDoubleError</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> parse_int</span><span style="color:#89DDFF">(</span><span style="color:#C792EA">const</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#FFCB6B">string</span><span style="color:#C792EA">&#x26;</span><span style="color:#89DDFF">);</span></span><span class="line"></span><span class="line"><span style="color:#FFCB6B">std</span><span style="color:#89DDFF">::</span><span style="color:#FFCB6B">expected</span><span style="color:#89DDFF">&#x3C;</span><span style="color:#C792EA">double</span><span style="color:#89DDFF">,</span><span style="color:#FFCB6B"> StringToSqrtDoubleError</span><span style="color:#89DDFF">></span><span style="color:#82AAFF"> stringToSqrtDouble</span><span style="color:#89DDFF">(</span><span style="color:#C792EA">const</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#FFCB6B">string</span><span style="color:#C792EA">&#x26;</span><span style="color:#EEFFFF;font-style:italic"> input</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#C792EA">    auto</span><span style="color:#EEFFFF"> parsed </span><span style="color:#89DDFF">=</span><span style="color:#82AAFF"> parse_int</span><span style="color:#89DDFF">(</span><span style="color:#EEFFFF">input</span><span style="color:#89DDFF">);</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">    if</span><span style="color:#89DDFF"> (!</span><span style="color:#EEFFFF">parsed</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF;font-style:italic"> return</span><span style="color:#EEFFFF"> parsed</span><span style="color:#89DDFF">;</span></span><span class="line"></span><span class="line"><span style="color:#C792EA">    auto</span><span style="color:#EEFFFF"> parsedInt </span><span style="color:#89DDFF">=</span><span style="color:#89DDFF"> *</span><span style="color:#EEFFFF">parsed</span><span style="color:#89DDFF">;</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">    if</span><span style="color:#89DDFF"> (</span><span style="color:#EEFFFF">parsedInt </span><span style="color:#89DDFF">&#x3C;</span><span style="color:#F78C6C"> 0</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF;font-style:italic"> return</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#82AAFF">unexpected</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">StringToSqrtDoubleError</span><span style="color:#89DDFF">::</span><span style="color:#EEFFFF">NegativeNumber</span><span style="color:#89DDFF">);</span></span><span class="line"></span><span class="line"><span style="color:#89DDFF;font-style:italic">    return</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#82AAFF">sqrt</span><span style="color:#89DDFF">(</span><span style="color:#EEFFFF">parsedInt</span><span style="color:#89DDFF">);</span></span><span class="line"><span style="color:#89DDFF">}</span></span></code></pre>
+        <template class="raw-code">enum class StringToSqrtDoubleError {
+    ParseError, NegativeNumber
+};
+
+std::expected&lt;int, StringToSqrtDoubleError&gt; parse_int(const std::string&amp;);
+
+std::expected&lt;double, StringToSqrtDoubleError&gt; stringToSqrtDouble(const std::string&amp; input) {
+    auto parsed = parse_int(input);
+    if (!parsed) return parsed;
+
+    auto parsedInt = *parsed;
+    if (parsedInt &lt; 0) return std::unexpected(StringToSqrtDoubleError::NegativeNumber);
+
+    return std::sqrt(parsedInt);
+}</template>
+      </div>
+<blockquote>
+<p><strong>译者的理解</strong>：这个 <code>std::expected</code> 超级好用，之前有这种返回+错误的需求，不然就是在参数里开一个引用参数，来传递错误（丑），不然就得用异常把错误抛出来。现在用这个处理错误可以说是非常爽了。</p>
+</blockquote>
+<h3 id="std-unreachable">std::unreachable</h3>
+<p>提供一种方法可以显式把代码路径标记为不可达。如果该代码路径被执行，则会导致未定义行为。</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">C++</span>
+          <button class="copy-btn" onclick="copyCodeBlock(this)" aria-label="复制代码">
+            <svg class="copy-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+        <pre class="shiki custom-theme-darker" style="background-color:#212121;color:#EEFFFF" tabindex="0"><code><span class="line"><span style="color:#C792EA">enum</span><span style="color:#C792EA"> class</span><span style="color:#FFCB6B"> MyEnum</span><span style="color:#89DDFF"> {</span><span style="color:#EEFFFF"> A</span><span style="color:#89DDFF">,</span><span style="color:#EEFFFF"> B</span><span style="color:#89DDFF">,</span><span style="color:#EEFFFF"> C</span><span style="color:#89DDFF"> };</span></span><span class="line"></span><span class="line"><span style="color:#C792EA">int</span><span style="color:#82AAFF"> convertMyEnumToInt</span><span style="color:#89DDFF">(</span><span style="color:#FFCB6B">MyEnum</span><span style="color:#EEFFFF;font-style:italic"> e</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">    switch</span><span style="color:#89DDFF"> (</span><span style="color:#F07178">e</span><span style="color:#89DDFF">)</span><span style="color:#89DDFF"> {</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">        case</span><span style="color:#FFCB6B"> MyEnum</span><span style="color:#89DDFF">::</span><span style="color:#F07178">A</span><span style="color:#89DDFF">:</span><span style="color:#89DDFF;font-style:italic"> return</span><span style="color:#F78C6C"> 0</span><span style="color:#89DDFF">;</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">        case</span><span style="color:#FFCB6B"> MyEnum</span><span style="color:#89DDFF">::</span><span style="color:#F07178">B</span><span style="color:#89DDFF">:</span><span style="color:#89DDFF;font-style:italic"> return</span><span style="color:#F78C6C"> 1</span><span style="color:#89DDFF">;</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">        case</span><span style="color:#FFCB6B"> MyEnum</span><span style="color:#89DDFF">::</span><span style="color:#F07178">C</span><span style="color:#89DDFF">:</span><span style="color:#89DDFF;font-style:italic"> return</span><span style="color:#F78C6C"> 2</span><span style="color:#89DDFF">;</span></span><span class="line"><span style="color:#89DDFF;font-style:italic">        default</span><span style="color:#89DDFF">:</span><span style="color:#FFCB6B"> std</span><span style="color:#89DDFF">::</span><span style="color:#82AAFF">unreachable</span><span style="color:#89DDFF">();</span><span style="color:#F07178"></span></span><span class="line"><span style="color:#89DDFF">    }</span></span><span class="line"><span style="color:#89DDFF">}</span></span></code></pre>
+        <template class="raw-code">enum class MyEnum { A, B, C };
+
+int convertMyEnumToInt(MyEnum e) {
+    switch (e) {
+        case MyEnum::A: return 0;
+        case MyEnum::B: return 1;
+        case MyEnum::C: return 2;
+        default: std::unreachable(); 
+    }
+}</template>
+      </div>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://ferociousmagikarp.github.io">Ferocious Magikarp</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://ferociousmagikarp.github.io/posts/ba290668/">https://ferociousmagikarp.github.io/posts/ba290668/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://ferociousmagikarp.github.io" target="_blank">鲤鱼王的记录小宇宙</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA/">计算机</a><a class="post-meta__tags" href="/tags/C/">C++</a></div><div class="post-share"><div class="social-share" data-image="/image/head.png"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/posts/5ae97771/" title="《线性代数应该这样学》·第三章·E"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">《线性代数应该这样学》·第三章·E</div></div><div class="info-2"><div class="info-item-1">向量空间的积与商</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related no-desc" href="/posts/fc667c96/" title="C++17语言特性记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-07-30</div><div class="info-item-2">C++17语言特性记录</div></div></div></a><a class="pagination-related no-desc" href="/posts/a2a9fa5f/" title="C++协程理论"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-19</div><div class="info-item-2">C++协程理论</div></div></div></a><a class="pagination-related" href="/posts/1405587/" title="C++协程：理解co_await操作"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-06-17</div><div class="info-item-2">C++协程：理解co_await操作</div></div><div class="info-2"><div class="info-item-1">原文来自 C++ Coroutines: Understanding operator co_await。</div></div></div></a><a class="pagination-related no-desc" href="/posts/19f1ba17/" title="C++20语言特性记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2023-08-01</div><div class="info-item-2">C++20语言特性记录</div></div></div></a><a class="pagination-related" href="/posts/43da13b0/" title="C++协程：理解承诺类型"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-07-13</div><div class="info-item-2">C++协程：理解承诺类型</div></div><div class="info-2"><div class="info-item-1">原文来自 C++ Coroutines: Understanding the promise type。</div></div></div></a><a class="pagination-related" href="/posts/e90d03dc/" title="32位整数位交错的速度能做到多快"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-12-16</div><div class="info-item-2">32位整数位交错的速度能做到多快</div></div><div class="info-2"><div class="info-item-1">原文来自 How fast can you bit-interleave 32-bit integers 以及 How fast can you bit-interleave 32-bit integers? (SIMD edition)。</div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/image/head.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Ferocious Magikarp</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">32</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">6</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/FerociousMagikarp"><i class="fab fa-github"></i><span>个人没啥价值的主页</span></a></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-text">正文</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#c-23%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7"><span class="toc-text">C++23语言特性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#consteval-if"><span class="toc-text">consteval if</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#deducing-this"><span class="toc-text">Deducing this</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E7%BB%B4%E4%B8%8B%E6%A0%87%E8%BF%90%E7%AE%97%E7%AC%A6%E9%87%8D%E8%BD%BD"><span class="toc-text">多维下标运算符重载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E5%8D%87%E8%8C%83%E5%9B%B4-for-%E5%BE%AA%E7%8E%AF%E7%9A%84%E5%AE%89%E5%85%A8%E6%80%A7"><span class="toc-text">提升范围 for 循环的安全性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#c-23%E5%BA%93%E7%89%B9%E6%80%A7"><span class="toc-text">C++23库特性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A0%86%E6%A0%88%E8%BF%BD%E8%B8%AA%E5%BA%93"><span class="toc-text">堆栈追踪库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#string-%E5%92%8C-string-view-%E7%9A%84-contains-%E5%87%BD%E6%95%B0"><span class="toc-text">string 和 string view 的 contains 函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#std-to-underlying"><span class="toc-text">std::to_underlying</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#spanstream"><span class="toc-text">spanstream</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BE%93%E5%85%A5-%E8%BE%93%E5%87%BA%E6%8C%87%E9%92%88"><span class="toc-text">输入&#x2F;输出指针</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#std-optional-%E7%9A%84-monad-%E6%93%8D%E4%BD%9C"><span class="toc-text">std::optional 的 monad 操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#std-expected"><span class="toc-text">std::expected</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#std-unreachable"><span class="toc-text">std::unreachable</span></a></li></ol></li></ol></li></ol></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2019 - 2026 By Ferocious Magikarp</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script src="/js/shiki_highlight.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
