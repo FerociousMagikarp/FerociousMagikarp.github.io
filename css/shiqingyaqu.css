@@ -1,0 +1,321 @@
+:root {
+    --bg-color: #2c2418;
+    --panel-bg: #3d3226;
+    --text-color: #e8dcc8;
+    --accent-color: #c8a86e;
+    --border-color: #5a4a38;
+    --highlight-color: #f0d080;
+    --board-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --radius: 10px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.app-container {
+    max-width: 1100px;
+    width: 100%;
+}
+
+/* 顶部选择器区域 */
+.top-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+    padding: 14px 18px;
+    background: var(--panel-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.top-bar label {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--accent-color);
+    white-space: nowrap;
+}
+
+.id-input {
+    width: 80px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: #2a2118;
+    color: var(--text-color);
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.id-input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(200, 168, 110, 0.25);
+}
+
+.id-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.id-input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: none;
+}
+
+.select-wrapper {
+    flex: 1;
+    min-width: 200px;
+}
+
+.game-select {
+    width: 100%;
+    padding: 9px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: #2a2118;
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.25s, box-shadow 0.25s;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c8a86e' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+.game-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(200, 168, 110, 0.25);
+}
+
+.game-select option {
+    background: #2a2118;
+    color: var(--text-color);
+    padding: 6px 10px;
+}
+
+/* 主内容区 */
+.main-content {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* 棋盘容器 */
+.board-container {
+    flex-shrink: 0;
+    position: relative;
+}
+
+.board-canvas {
+    display: block;
+    border-radius: 4px;
+    cursor: pointer;
+    max-width: 100%;
+    height: auto;
+}
+
+/* 右侧面板 */
+.side-panel {
+    flex: 1 1 200px;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    height: 675px;
+}
+
+/* 着法列表 */
+.moves-list {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #c5b8a2;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+    min-height: 0;
+}
+
+.panel-card {
+    background: var(--panel-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    padding: 16px 18px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.panel-card h3 {
+    font-size: 15px;
+    color: var(--accent-color);
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+}
+
+.panel-card h3.variation-title {
+    margin-top: 16px;
+}
+
+.moves-list::-webkit-scrollbar {
+    width: 5px;
+}
+.moves-list::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+.moves-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.moves-placeholder {
+    color: #7a6b58;
+    font-style: italic;
+    text-align: center;
+    padding: 30px 10px;
+    font-size: 13px;
+}
+
+.move-item {
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.move-item:hover {
+    background: rgba(200, 168, 110, 0.15);
+}
+
+.move-item.active {
+    background: rgba(200, 168, 110, 0.25);
+    color: var(--highlight-color);
+    font-weight: 600;
+}
+
+.move-cell {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 1px 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    min-width: 3.5em;       /* 保证两列宽度大致对齐 */
+    text-align: center;
+    white-space: nowrap;    /* 防止文本换行破坏布局 */
+}
+
+.move-cell:hover {
+    background: rgba(200, 168, 110, 0.15);
+}
+
+.move-cell.active {
+    background: rgba(200, 168, 110, 0.25);
+    color: var(--highlight-color);
+    font-weight: 600;
+}
+
+.move-cell.has-variation {
+    color: #e67e22;
+}
+
+.move-cell.empty {
+    cursor: default;
+}
+
+.move-cell.empty:hover {
+    background: transparent;
+    cursor: default;
+}
+
+.variation-list {
+    flex: 0 0 160px;
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #c5b8a2;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+    margin-top: 4px;
+}
+
+.variation-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.variation-list::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.variation-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.variation-item {
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.variation-item:hover {
+    background: rgba(200, 168, 110, 0.15);
+}
+
+.variation-item.active {
+    background: rgba(200, 168, 110, 0.25);
+    color: var(--highlight-color);
+    font-weight: 600;
+}
+
+.variation-mark {
+    font-size: 0.85em;
+    color: var(--accent-color);
+    margin-left: 4px;
+}
+
+/* 响应式 */
+@media (max-width: 820px) {
+    .main-content {
+        flex-direction: column;
+        align-items: center;
+    }
+    .side-panel {
+        height: auto;
+    }
+    .panel-card {
+        height: auto;
+        max-height: 600px;
+    }
+    .moves-list {
+        flex: none;
+        max-height: 300px;
+    }
+    .board-container {
+        padding: 10px;
+    }
+    .top-bar {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .select-wrapper {
+        min-width: 140px;
+    }
+}
