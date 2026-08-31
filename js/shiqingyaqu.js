@@ -304,6 +304,7 @@
         const fromLineStr = isRed ? numToChinese[fromLineNum] : String(fromLineNum);
         const toLineStr = isRed ? numToChinese[toLineNum] : String(toLineNum);
 
+        // 公共动作与目标数字计算
         let action = '';
         let numStr = '';
 
@@ -337,30 +338,33 @@
             numStr = toLineStr;
         }
 
-        // 同列同种棋子前缀
-        let prefix = '';
-        const samePieces = [];
-        for (let r = 0; r < ROWS; r++) {
-            if (r === move.fromRow) continue;
-            const p = stateBeforeMove[r][move.fromCol];
-            if (p && p.toUpperCase() === pieceType && (p === p.toUpperCase()) === isRed) {
-                samePieces.push({ row: r });
-            }
+        // 兵/卒特殊处理
+        if (pieceType === 'P') {
+            return getPawnNotation(stateBeforeMove, move, isRed, pieceName, fromLineStr, toLineStr, action, numStr, numToChinese);
         }
-        if (samePieces.length > 0) {
-            const total = samePieces.length + 1;
-            const sortedRows = [move.fromRow, ...samePieces.map(p => p.row)].sort((a,b) => {
-                return isRed ? (a - b) : (b - a);
-            });
-            const rank = sortedRows.indexOf(move.fromRow) + 1;
-            if (total === 2) {
-                prefix = rank === 1 ? '前' : '后';
-            } else if (total === 3) {
-                prefix = rank === 1 ? '前' : (rank === 2 ? '中' : '后');
-            } else {
-                if (rank === 1) prefix = '前';
-                else if (rank === total) prefix = '后';
-                else prefix = numToChinese[rank]; // 二、三...
+
+        // 其他棋子：只有车、马、炮需要同列同种棋子前缀（士象不需要）
+        let prefix = '';
+        if (['R', 'N', 'C'].includes(pieceType)) {
+            const samePieces = [];
+            for (let r = 0; r < ROWS; r++) {
+                if (r === move.fromRow) continue;
+                const p = stateBeforeMove[r][move.fromCol];
+                if (p && p.toUpperCase() === pieceType && (p === p.toUpperCase()) === isRed) {
+                    samePieces.push({ row: r });
+                }
+            }
+            if (samePieces.length > 0) {
+                // 车马炮最多两个，只分前后
+                const total = samePieces.length + 1;
+                const sortedRows = [move.fromRow, ...samePieces.map(p => p.row)].sort((a,b) => {
+                    return isRed ? (a - b) : (b - a);
+                });
+                const rank = sortedRows.indexOf(move.fromRow) + 1;
+                if (total === 2) {
+                    prefix = rank === 1 ? '前' : '后';
+                }
+                // 理论上不会出现 total > 2，忽略
             }
         }
 
@@ -371,6 +375,66 @@
             notation = pieceName + fromLineStr + action + numStr;
         }
         return notation;
+    }
+
+    // 兵/卒记谱辅助函数
+    function getPawnNotation(stateBeforeMove, move, isRed, pieceName, fromLineStr, toLineStr, action, numStr, numToChinese) {
+        // 收集所有同方兵/卒位置
+        const pawnPositions = [];
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                const p = stateBeforeMove[r][c];
+                if (p && p.toUpperCase() === 'P' && (p === p.toUpperCase()) === isRed) {
+                    pawnPositions.push({ row: r, col: c });
+                }
+            }
+        }
+
+        // 统计每列的兵/卒数量
+        const colCounts = {};
+        pawnPositions.forEach(pos => {
+            colCounts[pos.col] = (colCounts[pos.col] || 0) + 1;
+        });
+
+        // 判断是否出现多列叠兵（至少两列各有至少两个兵/卒）
+        const multiColumnStacked = Object.values(colCounts).filter(count => count >= 2).length >= 2;
+
+        // 当前列兵/卒数量
+        const currentColCount = colCounts[move.fromCol] || 0;
+
+        // 多列叠兵且当前列也有多个兵/卒 → 省略棋子名称
+        if (multiColumnStacked && currentColCount >= 2) {
+            const rowsInCol = pawnPositions.filter(p => p.col === move.fromCol).map(p => p.row);
+            rowsInCol.sort((a, b) => isRed ? (a - b) : (b - a));
+            const rank = rowsInCol.indexOf(move.fromRow) + 1;
+            const prefix = getPawnPrefix(rank, currentColCount, numToChinese);
+            return `${prefix}${fromLineStr}${action}${numStr}`;
+        }
+
+        // 单列叠兵（非多列叠兵，但当前列有多个）
+        if (currentColCount >= 2) {
+            const rowsInCol = pawnPositions.filter(p => p.col === move.fromCol).map(p => p.row);
+            rowsInCol.sort((a, b) => isRed ? (a - b) : (b - a));
+            const rank = rowsInCol.indexOf(move.fromRow) + 1;
+            const prefix = getPawnPrefix(rank, currentColCount, numToChinese);
+            return `${prefix}${pieceName}${action}${numStr}`;
+        }
+
+        // 无叠兵，正常记谱
+        return `${pieceName}${fromLineStr}${action}${numStr}`;
+    }
+
+    // 兵/卒前缀生成（前、中、后、二、三、四……）
+    function getPawnPrefix(rank, total, numToChinese) {
+        if (total === 2) {
+            return rank === 1 ? '前' : '后';
+        } else if (total === 3) {
+            return rank === 1 ? '前' : (rank === 2 ? '中' : '后');
+        } else if (total >= 4) {
+            if (rank === 1) return '前';
+            return numToChinese[rank]; // rank=2 → 二，rank=3 → 三，以此类推
+        }
+        return '';
     }
 
     // ============ 棋盘绘制 ============
@@ -667,7 +731,7 @@
         const startItem = document.createElement('div');
         startItem.className = 'move-item start-item';
         if (currentStepIndex === 0) startItem.classList.add('active');
-        startItem.textContent = ' ===== 棋局开始 =====';
+        startItem.textContent = ' (๑•̀ㅂ•́)و✧ 开始';
         startItem.addEventListener('click', () => {
             currentStepIndex = 0;
             applyCurrentStepToBoard();

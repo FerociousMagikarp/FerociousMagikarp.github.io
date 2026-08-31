@@ -128,10 +128,14 @@
 /* 右侧面板 */
 .side-panel {
     flex: 1 1 200px;
-    min-width: 180px;
+    min-width: 200px;
     display: flex;
     flex-direction: column;
     height: 675px;
+}
+
+.move-round {
+    white-space: nowrap;
 }
 
 /* 着法列表 */
