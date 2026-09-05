@@ -18,7 +18,7 @@
     const CANVAS_WIDTH = MARGIN_X * 2 + (COLS - 1) * CELL_SIZE;
     const CANVAS_HEIGHT = MARGIN_Y * 2 + (ROWS - 1) * CELL_SIZE;
 
-    const DEFAULT_FEN = 'rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR';
+    const DEFAULT_FEN = 'rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w';
 
     const PIECE_CHARS_RED = {
         'K': '帥', 'A': '仕', 'B': '相', 'N': '馬', 'R': '車', 'C': '炮', 'P': '兵'
@@ -55,6 +55,10 @@
     let currentPath = [];           // 当前显示的路径（节点数组）
     let initialBoardState = null;   // 初始棋盘状态副本
     let currentStepIndex = 0;
+    let selectedPos = null;     // 当前选中的棋子坐标 { col, row } 或 null
+    let initialTurn = 'red';
+    let currentTurn = 'red';    // 当前轮到哪一方走棋 'red' 或 'black'
+    let lastMove = null;   // 记录最近一次走棋的 move 对象 { fromCol, fromRow, toCol, toRow }
 
     // ============ 坐标转换 ============
     function colToX(col) { return MARGIN_X + col * CELL_SIZE; }
@@ -166,12 +170,28 @@
 
     // ============ FEN 解析 ============
     function parseFen(fen) {
-        const rows = fen.trim().split('/');
+        // 拆分出棋盘部分和可能存在的走棋方
+        const parts = fen.trim().split(/\s+/);
+        const boardPart = parts[0];
+        const turnPart = parts[1]; // 'w' 或 'b'，可选
+
+        const rows = boardPart.split('/');
         if (rows.length !== ROWS) {
             console.warn(`FEN行数不正确: ${rows.length}，应为${ROWS}，使用默认FEN`);
             fen = DEFAULT_FEN;
-            rows = fen.trim().split('/');
+            rows = DEFAULT_FEN.split(/\s+/)[0].split('/');
         }
+
+        // 更新走棋方
+        if (turnPart === 'w') {
+            currentTurn = 'red';
+        } else if (turnPart === 'b') {
+            currentTurn = 'black';
+        } else {
+            // 默认红方
+            currentTurn = 'red';
+        }
+
         currentFen = fen;
         boardState = [];
         for (let r = 0; r < ROWS; r++) {
@@ -286,6 +306,135 @@
 
     function isRedPiece(pieceCode) {
         return pieceCode === pieceCode.toUpperCase();
+    }
+
+    // 判断走法是否符合基本规则（不考虑将军、将帅对脸等）
+    function isValidMove(state, fromCol, fromRow, toCol, toRow) {
+        if (fromCol === toCol && fromRow === toRow) return false;
+        const piece = state[fromRow][fromCol];
+        if (!piece) return false;
+        const isRed = piece === piece.toUpperCase();
+        const target = state[toRow][toCol];
+        if (target && isRedPiece(target) === isRed) return false; // 不能吃己方棋子
+
+        const type = piece.toUpperCase();
+        const dr = toRow - fromRow;
+        const dc = toCol - fromCol;
+        const absDr = Math.abs(dr);
+        const absDc = Math.abs(dc);
+
+        switch (type) {
+            case 'K': { // 将帅：九宫内走一步直线
+                if (Math.abs(dr) + Math.abs(dc) !== 1) return false;
+                const palaceTop = isRed ? 7 : 0;
+                const palaceBottom = isRed ? 9 : 2;
+                const palaceLeft = 3;
+                const palaceRight = 5;
+                return toRow >= palaceTop && toRow <= palaceBottom &&
+                    toCol >= palaceLeft && toCol <= palaceRight;
+            }
+            case 'A': { // 士：九宫内斜走一步
+                if (absDr !== 1 || absDc !== 1) return false;
+                const palaceTop = isRed ? 7 : 0;
+                const palaceBottom = isRed ? 9 : 2;
+                const palaceLeft = 3;
+                const palaceRight = 5;
+                return toRow >= palaceTop && toRow <= palaceBottom &&
+                    toCol >= palaceLeft && toCol <= palaceRight;
+            }
+            case 'B': { // 相/象：田字走，不能过河，塞象眼
+                if (absDr !== 2 || absDc !== 2) return false;
+                // 不能过河
+                if (isRed && toRow < 5) return false;
+                if (!isRed && toRow > 4) return false;
+                const eyeRow = (fromRow + toRow) / 2;
+                const eyeCol = (fromCol + toCol) / 2;
+                if (state[eyeRow][eyeCol]) return false; // 塞象眼
+                return true;
+            }
+            case 'N': { // 马：日字走，蹩马腿
+                if (!((absDr === 2 && absDc === 1) || (absDr === 1 && absDc === 2))) return false;
+                let blockRow, blockCol;
+                if (absDr === 2) {
+                    blockRow = fromRow + (dr / 2);
+                    blockCol = fromCol;
+                } else {
+                    blockRow = fromRow;
+                    blockCol = fromCol + (dc / 2);
+                }
+                return !state[blockRow][blockCol];
+            }
+            case 'R': { // 车：直线行走，中间无阻挡
+                if (dr !== 0 && dc !== 0) return false;
+                if (dr === 0) {
+                    const minC = Math.min(fromCol, toCol);
+                    const maxC = Math.max(fromCol, toCol);
+                    for (let c = minC + 1; c < maxC; c++) {
+                        if (state[fromRow][c]) return false;
+                    }
+                } else {
+                    const minR = Math.min(fromRow, toRow);
+                    const maxR = Math.max(fromRow, toRow);
+                    for (let r = minR + 1; r < maxR; r++) {
+                        if (state[r][fromCol]) return false;
+                    }
+                }
+                return true;
+            }
+            case 'C': { // 炮：直线行走，吃子需隔一个棋子，不吃子不能有棋子
+                if (dr !== 0 && dc !== 0) return false;
+                let count = 0;
+                if (dr === 0) {
+                    const minC = Math.min(fromCol, toCol);
+                    const maxC = Math.max(fromCol, toCol);
+                    for (let c = minC + 1; c < maxC; c++) {
+                        if (state[fromRow][c]) count++;
+                    }
+                } else {
+                    const minR = Math.min(fromRow, toRow);
+                    const maxR = Math.max(fromRow, toRow);
+                    for (let r = minR + 1; r < maxR; r++) {
+                        if (state[r][fromCol]) count++;
+                    }
+                }
+                if (target) return count === 1;   // 吃子必须恰好隔一个
+                return count === 0;               // 不吃子不能有阻挡
+            }
+            case 'P': { // 兵/卒
+                if (isRed) {
+                    // 红方兵：未过河（row >= 5）只能向前（row 减小），过河后可向前或横走
+                    if (fromRow >= 5) {
+                        if (dc !== 0) return false;       // 未过河不能横走
+                        return dr === -1;
+                    } else {
+                        // 过河后：可以向前一步或横走一步，不能后退
+                        if (dr === 1) return false;       // 不能后退
+                        if (dr === -1 && dc === 0) return true;
+                        if (dr === 0 && Math.abs(dc) === 1) return true;
+                        return false;
+                    }
+                } else {
+                    // 黑方卒：未过河（row <= 4）只能向前（row 增大），过河后可向前或横走
+                    if (fromRow <= 4) {
+                        if (dc !== 0) return false;
+                        return dr === 1;
+                    } else {
+                        if (dr === -1) return false;      // 不能后退
+                        if (dr === 1 && dc === 0) return true;
+                        if (dr === 0 && Math.abs(dc) === 1) return true;
+                        return false;
+                    }
+                }
+            }
+            default:
+                return false;
+        }
+    }
+
+    // 根据步数获取该步应由哪一方走棋
+    function getTurnForStep(step) {
+        if (step <= 0) return initialTurn;
+        return (step % 2 === 1) ? initialTurn : (initialTurn === 'red' ? 'black' : 'red');
     }
 
     function moveToNotation(stateBeforeMove, move, isRedTurn) {
@@ -437,6 +586,54 @@
         return '';
     }
 
+    /**
+     * 在指定交叉点绘制四角矩形标记
+     * @param {number} col - 列
+     * @param {number} row - 行
+     * @param {string} color - 线条颜色
+     * @param {number} [cornerLen=12] - 角线长度
+     * @param {number} [lineWidth=3.5] - 线宽
+     * @param {string} [shadowColor] - 阴影颜色（可选）
+     */
+    function drawCornerMarker(col, row, color, cornerLen = 12, lineWidth = 3.5, shadowColor = null) {
+        const x = colToX(col);
+        const y = rowToY(row);
+        const halfSize = PIECE_RADIUS;
+        const left = x - halfSize;
+        const right = x + halfSize;
+        const top = y - halfSize;
+        const bottom = y + halfSize;
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.lineCap = 'round';
+        if (shadowColor) {
+            ctx.shadowColor = shadowColor;
+            ctx.shadowBlur = 6;
+        }
+
+        ctx.beginPath();
+        // 左上角
+        ctx.moveTo(left, top + cornerLen);
+        ctx.lineTo(left, top);
+        ctx.lineTo(left + cornerLen, top);
+        // 右上角
+        ctx.moveTo(right - cornerLen, top);
+        ctx.lineTo(right, top);
+        ctx.lineTo(right, top + cornerLen);
+        // 右下角
+        ctx.moveTo(right, bottom - cornerLen);
+        ctx.lineTo(right, bottom);
+        ctx.lineTo(right - cornerLen, bottom);
+        // 左下角
+        ctx.moveTo(left + cornerLen, bottom);
+        ctx.lineTo(left, bottom);
+        ctx.lineTo(left, bottom - cornerLen);
+        ctx.stroke();
+        ctx.restore();
+    }
+
     // ============ 棋盘绘制 ============
     function drawBoard() {
         const w = canvas.width;
@@ -571,6 +768,37 @@
 
         for (const pos of CANNON_MARK_POSITIONS) drawPositionMark(pos.col, pos.row);
         for (const pos of PAWN_MARK_POSITIONS) drawPositionMark(pos.col, pos.row);
+
+        // ========== 绘制走棋标记（红色四角矩形）==========
+        if (lastMove) {
+            // 起始位置标记
+            drawCornerMarker(
+                lastMove.fromCol, lastMove.fromRow,
+                '#E74C3C',                      // 红色
+                14,                              // 角线长度稍长
+                4.0,                             // 线宽略粗
+                'rgba(231, 76, 60, 0.7)'        // 红色阴影
+            );
+            // 终止位置标记
+            drawCornerMarker(
+                lastMove.toCol, lastMove.toRow,
+                '#E74C3C',
+                14,
+                4.0,
+                'rgba(231, 76, 60, 0.7)'
+            );
+        }
+
+        // ========== 绘制选中标记（蓝色四角矩形）==========
+        if (selectedPos) {
+            drawCornerMarker(
+                selectedPos.col, selectedPos.row,
+                '#4A90D9',                      // 蓝色
+                12,                              // 原角线长度
+                3.5,                             // 原线宽
+                'rgba(74, 144, 217, 0.7)'       // 原阴影
+            );
+        }
 
         // 棋子
         for (let r = 0; r < ROWS; r++) {
@@ -734,6 +962,9 @@
         startItem.textContent = ' (๑•̀ㅂ•́)و✧ 开始';
         startItem.addEventListener('click', () => {
             currentStepIndex = 0;
+            currentTurn = 'red';
+            selectedPos = null;
+            lastMove = null;
             applyCurrentStepToBoard();
             renderMovesList();
             renderVariations();
@@ -748,7 +979,7 @@
         while (i < moveNodes.length) {
             const node = moveNodes[i];
             const step = node.step;
-            if (step % 2 === 1) { // 红方步（奇数）
+            if (getTurnForStep(step) === 'red') { // 红方步（奇数）
                 rounds.push({ red: node, black: (i+1 < moveNodes.length && moveNodes[i+1].step === step+1) ? moveNodes[i+1] : null });
                 i += (rounds[rounds.length-1].black ? 2 : 1);
             } else { // 黑方步（偶数，说明黑方先手）
@@ -778,9 +1009,12 @@
                     // redSpan.appendChild(varMark);
                     redSpan.classList.add('has-variation');
                 }
-                if (currentStepIndex === round.red.step) redSpan.classList.add('active');
+                if (currentStepIndex >= 0 && currentStepIndex === round.red.step) redSpan.classList.add('active');
                 redSpan.addEventListener('click', () => {
                     currentStepIndex = round.red.step;
+                    currentTurn = getTurnForStep(currentStepIndex + 1);
+                    selectedPos = null;  // 清除选中状态
+                    lastMove = round.red.move; 
                     applyCurrentStepToBoard();
                     renderMovesList();
                     renderVariations();
@@ -807,9 +1041,12 @@
                     // blackSpan.appendChild(varMark);
                     blackSpan.classList.add('has-variation');
                 }
-                if (currentStepIndex === round.black.step) blackSpan.classList.add('active');
+                if (currentStepIndex >= 0 && currentStepIndex === round.black.step) blackSpan.classList.add('active');
                 blackSpan.addEventListener('click', () => {
                     currentStepIndex = round.black.step;
+                    currentTurn = getTurnForStep(currentStepIndex + 1);
+                    selectedPos = null;
+                    lastMove = round.black.move;
                     applyCurrentStepToBoard();
                     renderMovesList();
                     renderVariations();
@@ -826,6 +1063,11 @@
     }
 
     function renderVariations() {
+        if (!currentPath.length || currentStepIndex < 0 || currentStepIndex >= currentPath.length) {
+            variationListEl.innerHTML = '<div class="moves-placeholder">无变着</div>';
+            return;
+        }
+
         const variationListEl = document.getElementById('variationList');
         if (!variationListEl) return;
         variationListEl.innerHTML = '';
@@ -853,7 +1095,7 @@
         children.forEach(child => {
             const isCurrent = (branchChildInPath === child);
             const stateBeforeMove = getBoardStateAtNode(branchNode);
-            const isRedTurn = (child.step % 2 === 1);
+            const isRedTurn = getTurnForStep(child.step) === 'red';
             const notation = moveToNotation(stateBeforeMove, child.move, isRedTurn);
 
             const varItem = document.createElement('div');
@@ -881,6 +1123,7 @@
 
                 currentPath = newPath;
                 currentStepIndex = currentPath.indexOf(child);
+                lastMove = child.move;
                 applyCurrentStepToBoard();
                 renderMovesList();
                 renderVariations();
@@ -890,8 +1133,12 @@
     }
 
     function initGame(game) {
+        lastMove = null;
+        selectedPos = null;
+        
         currentGame = game;
         parseFen(game.fen);
+        initialTurn = currentTurn; // 记录初始走棋方
         initialBoardState = cloneBoardState(boardState);
         moveTreeRoot = buildMoveTree(game);
 
@@ -971,13 +1218,91 @@
         const canvasY = (e.clientY - rect.top) * scaleY;
         const col = xToCol(canvasX);
         const row = yToRow(canvasY);
-        if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
-            const piece = boardState[row][col];
-            if (piece) {
-                const char = getPieceChar(piece);
-                const side = isRedPiece(piece) ? '红方' : '黑方';
-                console.log(`点击了 ${side}${char} (${col},${row})`);
+        if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
+
+        const clickedPiece = boardState[row][col];
+
+        // 没有选中任何棋子
+        if (!selectedPos) {
+            if (clickedPiece && isRedPiece(clickedPiece) === (currentTurn === 'red')) {
+                selectedPos = { col, row };
+                drawBoard();
             }
+            return;
+        }
+
+        // 已选中棋子，判断点击目标
+        const fromCol = selectedPos.col;
+        const fromRow = selectedPos.row;
+        const selectedPiece = boardState[fromRow][fromCol];
+
+        // 如果点击的是己方另一个棋子，切换选中
+        if (clickedPiece && isRedPiece(clickedPiece) === isRedPiece(selectedPiece)) {
+            selectedPos = { col, row };
+            drawBoard();
+            return;
+        }
+
+        // 尝试走棋
+        if (isValidMove(boardState, fromCol, fromRow, col, row)) {
+            // 记录走法信息
+            const move = { fromCol, fromRow, toCol: col, toRow: row };
+            
+            // 尝试匹配当前路径的下一步分支
+            let matchedNode = null;
+            let currentNode = null;
+            if (currentStepIndex >= 0 && currentStepIndex < currentPath.length) {
+                currentNode = currentPath[currentStepIndex];
+                if (currentNode && currentNode.children.length > 0) {
+                    matchedNode = currentNode.children.find(child =>
+                        child.move.fromCol === move.fromCol &&
+                        child.move.fromRow === move.fromRow &&
+                        child.move.toCol === move.toCol &&
+                        child.move.toRow === move.toRow
+                    );
+                }
+            }
+
+            // 清除选中状态
+            selectedPos = null;
+            if (matchedNode) {
+                // 匹配到分支：切换路径到该分支，并沿第一个子节点走到底
+                const branchNode = currentNode;
+                const newPath = [];
+                let pathNode = moveTreeRoot;
+                newPath.push(pathNode);
+                while (pathNode !== branchNode) {
+                    const next = pathNode.children.find(c => currentPath.includes(c));
+                    pathNode = next || pathNode.children[0];
+                    newPath.push(pathNode);
+                }
+                newPath.push(matchedNode);
+                pathNode = matchedNode;
+                while (pathNode.children.length > 0) {
+                    pathNode = pathNode.children[0];
+                    newPath.push(pathNode);
+                }
+                currentPath = newPath;
+                currentStepIndex = matchedNode.step;
+                lastMove = move;
+                applyCurrentStepToBoard();
+                currentTurn = getTurnForStep(matchedNode.step + 1);
+            } else {
+                // 不匹配任何分支：自由走棋，仅更新棋盘
+                boardState = applyMoveToState(boardState, move);
+                currentFen = boardStateToFen(boardState);
+                currentTurn = (currentTurn === 'red') ? 'black' : 'red';
+                currentStepIndex = -1;  // 标记为不在记录路径上
+                lastMove = move;
+                drawBoard();
+            }
+
+            renderMovesList();
+            renderVariations();
+        } else {
+            // 无效走法，取消选中
+            selectedPos = null;
+            drawBoard();
         }
     });
 
