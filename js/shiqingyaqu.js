@@ -59,6 +59,7 @@
     let initialTurn = 'red';
     let currentTurn = 'red';    // 当前轮到哪一方走棋 'red' 或 'black'
     let lastMove = null;   // 记录最近一次走棋的 move 对象 { fromCol, fromRow, toCol, toRow }
+    let undoStack = [];   // 存储自由走棋前的快照 { boardState, currentFen, currentTurn, currentStepIndex, lastMove }
 
     // ============ 坐标转换 ============
     function colToX(col) { return MARGIN_X + col * CELL_SIZE; }
@@ -1063,13 +1064,14 @@
     }
 
     function renderVariations() {
+        const variationListEl = document.getElementById('variationList');
+        if (!variationListEl) return;
+
         if (!currentPath.length || currentStepIndex < 0 || currentStepIndex >= currentPath.length) {
             variationListEl.innerHTML = '<div class="moves-placeholder">无变着</div>';
             return;
         }
 
-        const variationListEl = document.getElementById('variationList');
-        if (!variationListEl) return;
         variationListEl.innerHTML = '';
 
         if (!currentPath.length || currentStepIndex >= currentPath.length) {
@@ -1285,9 +1287,20 @@
                 currentPath = newPath;
                 currentStepIndex = matchedNode.step;
                 lastMove = move;
+                // 谱着：清空撤销栈
+                undoStack.length = 0;
                 applyCurrentStepToBoard();
                 currentTurn = getTurnForStep(matchedNode.step + 1);
             } else {
+                // 自由走棋：保存当前状态快照，然后执行走棋
+                undoStack.push({
+                    boardState: cloneBoardState(boardState),
+                    currentFen: currentFen,
+                    currentTurn: currentTurn,
+                    currentStepIndex: currentStepIndex,
+                    lastMove: lastMove ? { ...lastMove } : null
+                });
+
                 // 不匹配任何分支：自由走棋，仅更新棋盘
                 boardState = applyMoveToState(boardState, move);
                 currentFen = boardStateToFen(boardState);
@@ -1303,6 +1316,29 @@
             // 无效走法，取消选中
             selectedPos = null;
             drawBoard();
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        // 避免在输入框内触发，保留输入框的退格删除功能
+        const activeTag = document.activeElement && document.activeElement.tagName;
+        if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
+
+        if (e.key === 'Backspace' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            e.preventDefault();   // 防止浏览器后退
+            if (undoStack.length === 0) return;
+
+            const snapshot = undoStack.pop();
+            boardState = snapshot.boardState;
+            currentFen = snapshot.currentFen;
+            currentTurn = snapshot.currentTurn;
+            currentStepIndex = snapshot.currentStepIndex;
+            lastMove = snapshot.lastMove;
+            selectedPos = null;
+
+            if (resourcesReady) drawBoard();
+            renderMovesList();
+            renderVariations();
         }
     });
 
